@@ -1,0 +1,49 @@
+# Python environments and generated files
+.venv/
+.venv-*/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Local tools and caches (keep uv.lock and .python-version in Git)
+/.tools/
+/.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Jupyter autosaves; notebooks themselves remain tracked
+.ipynb_checkpoints/
+
+# Downloaded data, intermediate data, and reproducible local outputs
+/data/raw/
+/data/interim/
+/data/processed/
+/outputs/
+/tmp/
+/temp/
+*.log
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini

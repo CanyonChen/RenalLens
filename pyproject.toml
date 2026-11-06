@@ -1,0 +1,30 @@
+[project]
+name = "renallens"
+version = "0.1.0"
+description = "Exploring how missing-value handling changes patterns in the UCI Chronic Kidney Disease dataset."
+readme = "README.md"
+requires-python = "==3.13.15"
+license = "MIT"
+authors = [{ name = "RenalLens contributors" }]
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "scipy",
+    "seaborn",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel",
+    "jupyterlab",
+]
+
+[project.urls]
+Repository = "https://github.com/CanyonChen/RenalLens"
+
+[tool.uv]
+package = false
+required-version = "==0.13.7"
+default-groups = ["dev"]
