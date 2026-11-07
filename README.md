@@ -12,9 +12,15 @@ RenalLens 是香港城市大学 **DSC5002 — 探索性数据分析与可视化*
 
 ## Project status / 项目状态
 
-The repository contains the proposal, a shared Python development environment, and a Windows setup script. The four analysis files (`data_preprocess.py`, `pipeline.sh`, `test.py`, and `train.py`) are currently empty placeholders; data cleaning, analysis, plotting, and an end-to-end pipeline are still to be implemented. The workflow below describes the agreed project plan. The `train.py` filename is a placeholder and does not imply that a predictive model has been implemented or is required.
+**2026-11-07** · The pipeline includes five clinically motivated comparisons within the recorded CKD and non-CKD groups, alongside the missing-data and PCA analyses. The scripts and reports have been checked statically. The full analysis, browser review and interpretation of new results are pending.
 
-仓库目前包含项目提案、统一的 Python 开发环境和 Windows 配置脚本。四个分析文件（`data_preprocess.py`、`pipeline.sh`、`test.py`、`train.py`）仍为空占位文件；数据清洗、分析、绘图和完整流水线有待实现。下文的分析流程描述项目计划。`train.py` 只是预留文件名，不代表已实现预测模型，也不表示项目必须开展模型训练。
+**2026-11-07** · 已在缺失处理和 PCA 分析中加入医学解读，并在原始 CKD、非 CKD 两组内实现五项临床分层比较。脚本与报告模板已做静态检查，全量实验、浏览器验图及新结果解读待后续完成。下方样本数来自提案中的初步核查。
+
+| Research question / 研究问题 | Implemented evaluation / 已实现的测评 |
+| --- | --- |
+| Q1 · Missingness and representation / 缺失与样本构成 | Original missingness by feature and patient, group counts and shares by view, and within-group retention after deletion / 按指标和患者记录原始缺失，对比三种视角的组别计数、占比及删除后的组内保留率 |
+| Q2 · Distributions and associations / 分布与关联 | Overall and group summaries of the five measurements, concentration at the observed median, paired sample sizes and Pearson/Spearman coefficients in each view / 五项指标的总体与分组统计、原始中位数处的取值集中程度，以及各视角下的成对样本量与两种相关系数 |
+| Q3 · Extremes, skewness and scale / 极端值、偏度与尺度 | Traceable extreme observations, paired raw/log values, raw/z-score patient matrices and two fixed-cohort PCA fits / 可追溯的极端观测、配对的原值与对数、患者的原尺度与标准化矩阵，以及同队列的两组 PCA |
 
 ## Research questions / 研究问题
 
@@ -59,12 +65,54 @@ The proposal's preliminary audit reports **158 complete records: 43 CKD and 115 
    **核查与清洗。** 保留下载的原始文件，检查类型、文档单位、缺失值标记、空白字符、类别拼写、数值转换和重复记录；按照数据字典处理编码型指标。
 2. **Compare missing-value strategies.** Build the three views above and keep indicators for originally missing entries. Exclude the diagnosis label from imputation and explanatory-feature calculations.\
    **比较缺失值策略。** 构建上述三种视角，保留原始缺失位置的指示变量。填补及解释变量计算不使用诊断标签。
-3. **Summarize and visualize.** Report counts, means, medians, standard deviations, and interquartile ranges. Use missingness plots, group-count bars, aligned histograms or empirical cumulative distribution curves, box plots, and selected scatter plots.\
-   **汇总与绘图。** 报告样本量、均值、中位数、标准差和四分位距；绘制缺失情况图、组别计数图、对齐的直方图或经验累积分布曲线、箱线图和所选散点图。
-4. **Inspect associations and scale effects.** Compare Pearson and Spearman correlations, patient-by-feature heatmaps, and suitable logarithmic transformations. Keep the patient set and other processing steps fixed for scale comparisons.\
-   **检查关联与尺度效应。** 比较 Pearson 与 Spearman 相关系数、患者与特征热图及适用的对数变换。比较尺度时，保持患者集合及其他处理步骤一致。
-5. **Optionally explore PCA.** Compare unstandardized and standardized numerical features using the same median-imputed records; inspect scores, explained variance, and loadings.\
-   **可选 PCA 分析。** 在同一批中位数填补后的记录上，对比数值特征标准化前后的主成分得分、解释方差和载荷。
+3. **Trace representation and distributions.** Report counts, means, medians, standard deviations and interquartile ranges. Link each patient's missing entries to their retention status and compare the five measurements across the three views.\
+   **追踪样本构成与分布。** 报告样本量、均值、中位数、标准差和四分位距。从每位患者原本缺少的项目追溯其去留，在三种视角下对照五项指标的分布。
+4. **Inspect associations and transformations.** Compare each pair's Pearson and Spearman estimates with its underlying patients. Examine eligible measurements before and after the log transformation using the same observations.\
+   **核对关联与变换。** 将两种相关系数与参与计算的患者点对照，对适用指标用相同观测比较原值与自然对数。
+5. **Fit both PCA models.** Use the same median-imputed records and the same five features. Fit centered PCA in original units, then fit PCA after z-score standardization. Export scores, explained variance and loadings for both. Diagnosis is used to label the projections.\
+   **比较两组 PCA。** 固定中位数填补后的患者与五项指标，分别做原始单位下的中心化 PCA、z 标准化后的 PCA。两组均输出得分、解释方差和载荷，诊断标签仅用于标识投影中的患者。
+
+### Clinical interpretation / 医学分析
+
+The proposal's preliminary counts give a clinical reason to examine selection first. Requiring all 24 features retained 43 of 250 CKD records (17.2%) and 115 of 150 non-CKD records (76.7%). A shift in pooled creatinine or hemoglobin can therefore reflect a different mix of patients. The records alone do not establish why a test was missing or how ill the excluded patients were.
+
+先看哪些患者还在分析中。按提案初核，完整病例筛选保留了原 CKD 组的 **43/250（17.2%）**，非 CKD 组的 **115/150（76.7%）**。即使没有一个人的实测值改变，总体肌酐或血红蛋白的分布也可能因两组构成改变而移动。病例被删除的原因、被删除者是否病情更重，均需额外证据。[项目提案](docs/proposal.md)
+
+Within each recorded diagnosis group, the following comparisons use the clinical context as **originally recorded**. An unrecorded history or albumin grade has its own row in all three views. Each cell reports the stratum size, the measured and imputed counts, and the median with the 25th and 75th percentiles. These are unadjusted, cross-sectional descriptions.
+
+在 CKD、非 CKD 两组内分别比较下表。三种缺失策略均按**原始记录**划分病史或白蛋白等级，原本缺失的分层信息单列为“未记录”。每格给出层内人数、实测与填补人数，以及中位数和第 25、75 百分位数。先比较实测分布，再看删除或填补改变了多少患者和读数；小样本层应随结果报告分母。
+
+| Clinical question / 医学问题 | How to interpret the comparison / 读表依据 |
+| --- | --- |
+| Kidney function / 肾功能：`sc × al`、`bu × al` | Compare serum creatinine and blood urea across the original albumin grades. / 在同一诊断组内看各白蛋白等级的肌酐和血尿素分布是否同向变化，再对照两者的实测散点。肌酐受肌肉量影响，脱水也可升高血尿素。`bu` 采用原字段的血尿素定义，`al` 仅有 0–5 编码。[UCI 变量字典](https://archive.ics.uci.edu/dataset/336/chronic+kidney+disease) · [NIDDK 肌酐解读](https://www.niddk.nih.gov/research-funding/research-programs/kidney-clinical-research-epidemiology/laboratory/factors-affecting-egfr-accuracy/clinical-measurements) · [NHS 血尿素解读](https://www.southtees.nhs.uk/services/pathology/tests/Urea/) |
+| Anemia / 贫血：`hemo × ane` | Compare hemoglobin across recorded anemia groups. / 按贫血记录比较血红蛋白。CKD 相关的促红细胞生成素减少是一种可能机制，缺铁、炎症或失血也可能参与。数据缺少铁代谢指标，字典仅给血红蛋白单位 `gms`，因此沿用原始贫血标记，个体病因待其他证据确认。[NIDDK 肾病与贫血](https://www.niddk.nih.gov/health-information/kidney-disease/anemia) |
+| Diabetes / 糖尿病：`bgr × dm` | Compare random blood glucose across recorded diabetes groups. / 看糖尿病记录为“有”“无”“未记录”的患者，其随机血糖分布有多大重叠。进餐时间会影响单次读数，按随机血糖作诊断还涉及典型症状等条件。数据未提供进餐时间、典型症状或 HbA1c。[NIDDK 糖尿病检验](https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/diabetes/diabetes-prediabetes) |
+| Hypertension / 高血压：`bp × htn` | Compare the recorded pressure across hypertension groups. / 按高血压记录对比血压。UCI 只给一个 `bp` 值和 mmHg 单位，未标明收缩压、舒张压或复测方式。可以描述组间读数差异，判断血压控制情况还需明确测量类型、条件和重复读数。[UCI 变量字典](https://archive.ics.uci.edu/dataset/336/chronic+kidney+disease) · [WHO 高血压说明](https://www.who.int/news-room/fact-sheets/detail/hypertension) |
+
+KDIGO defines CKD by kidney abnormalities present for at least three months and classifies it by cause, GFR and albuminuria. UCI has one row per patient and supplies a diagnosis label. Serial results, sex and a quantitative urine albumin-to-creatinine ratio (uACR) are unavailable. We keep the supplied labels and describe PCA as variation across the five readings.
+
+KDIGO 的 CKD 定义要求肾脏结构或功能异常持续至少三个月，临床分类结合病因、肾小球滤过率（GFR）和白蛋白尿。这里缺少纵向复测、性别和定量尿白蛋白/肌酐比（uACR），无法据此重建标准成人肌酐 eGFR 或 KDIGO 分期。报告沿用原始 CKD 标签，PCA 仅描述这五项读数在样本中怎样共同变化。[KDIGO 2024 指南，§1.1.3](https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf) · [NIDDK 成人 eGFR 公式](https://www.niddk.nih.gov/research-funding/research-programs/kidney-clinical-research-epidemiology/laboratory/glomerular-filtration-rate-equations/adults)
+
+### Interactive visual comparisons / 交互可视化方案
+
+Both reports use the source `row_id`. Each view makes a processing decision visible and lets the reader check it against the underlying observations.
+
+两份离线报告共用原始 `row_id`。可按下面的顺序演示，每一步都能从图中找到对应的样本或统计量。
+
+| Question / 问题 | Interaction / 如何阅读 |
+| --- | --- |
+| Which patients are retained? / 谁被保留？ | Each patient occupies a fixed cell within their diagnosis group. Select a measurement and switch views to see deletion or imputation at the same location. Select a patient to inspect their missing fields. / 每位患者在所属诊断组中有固定格位。选定指标并切换处理方式，可看见哪些行被删除、哪些读数被填补。点一格即可核查该患者缺了哪些项。 |
+| Where does the imputed mass go? / 填补值集中到了哪里？ | Compare quartiles on one measurement axis and inspect how many values at the full-cohort median were observed or filled. The sample size belongs to the selected view and group. / 同一数轴上对照三种视角的分位数，区分全队列中位数处的实测值与填补值，结合当前视角及分组的有效人数解读。 |
+| Which associations change? / 哪对指标的关系发生变化？ | Compare the three estimates for each of ten pairs on a fixed correlation scale. Select a pair and a strategy to inspect the actual points and their imputation status. / 在固定的相关系数轴上比较十对指标各自的三种估计。选择一对及其处理视角，查看构成该系数的患者点及填补情况。 |
+| What changes with units? / 尺度改变了什么？ | Select one patient in the two PCA projections to inspect their raw and standardized readings. Inspect PC1 or PC2 to see which features shape that axis. A paired raw/log view exposes the upper tail of eligible measurements. / 两幅 PCA 图同时定位所选患者，对照其原值、z 分数与填补标记。切换 PC1 或 PC2 查看各指标在该方向的权重，原值与对数的配对视图用于查看右尾如何变化。 |
+
+The two PCA fits estimate their own axes. Interpret each using its explained variance and feature weights. A patient's two plotted positions refer to the same source record. For one axis, squared eigenvector coefficients sum to one, while the exported loading is the coefficient multiplied by the square root of the eigenvalue.
+
+两组 PCA 各自估计主轴，同一患者的两个位置应结合各图的解释方差和特征权重分别解读。每个主轴的方向系数平方之和为 1，可用于展示该轴的构成。CSV 中的载荷另按方向系数乘特征值的平方根计算。
+
+For a walkthrough, select serum creatinine (`sc`). Pick a source row flagged by the 1.5 × IQR rule to locate that patient in the cohort display. Enter the same row ID in the PCA report to highlight both projections and its column in the five-measurement strip. The readings show which values were measured and which were filled.
+
+演示时可以选血清肌酐（`sc`）。若有按 1.5 × IQR 规则标记的极端实测值，从复核列表定位其患者格，再在 PCA 页选同一行号。两幅投影和五项读数色带会同时定位该患者，读数旁标有实测或填补来源。
 
 Extreme observations will be inspected, with removal requiring a documented data-quality reason. Ordinary z-score standardization does not change Pearson correlations for a fixed set of observations. Conclusions will describe associations and processing effects within this dataset.
 
@@ -81,11 +129,12 @@ RenalLens/
 │   ├── proposal.md
 │   └── DSC5002_CKD_Proposal.pdf
 ├── scripts/
-│   ├── data_preprocess.py     # Placeholder / 占位文件
-│   ├── pipeline.sh            # Placeholder / 占位文件
+│   ├── data_preprocess.py     # Clean and audit the three views / 清洗、核查并构建三种视角
+│   ├── pipeline.sh            # Run the stages in order / 顺序执行各阶段
 │   ├── setup.ps1              # Windows environment setup / Windows 环境配置
-│   ├── test.py                # Placeholder / 占位文件
-│   └── train.py               # Placeholder / 占位文件
+│   ├── test.py                # Compare missing-value strategies / 测评缺失值处理策略
+│   ├── train.py               # Scale transformations and PCA / 尺度变换与 PCA
+│   └── views/                 # Offline HTML report templates / 离线报告模板
 ├── .gitignore
 ├── .python-version
 ├── LICENSE
@@ -193,15 +242,39 @@ uv run --locked python -c "import pandas as pd; df = pd.read_csv('data/raw/ckd.c
 Record the download date, source URL, and file checksum when documenting an analysis. Perform cleaning on a copy and write derived data to the corresponding local data directory.\
 记录分析过程时，应注明下载日期、来源 URL 和文件校验值。清洗基于副本开展，派生数据写入对应的本地数据目录。
 
-### 5. Start exploratory work / 开始探索性分析
+### 5. Run the descriptive evaluation / 运行描述性测评
+
+From the repository root, the following commands work in PowerShell and Bash. They produce numerical tables by default. The preprocessing step gives every source row a stable `row_id` for matching patients across views.
+
+在仓库根目录依次执行以下命令，适用于 PowerShell 和 Bash。默认生成数值表。预处理为每条原始记录分配稳定的 `row_id`，可据此对齐不同视角中的同一患者。
 
 ```sh
-uv run --locked jupyter lab
+uv run --locked python scripts/data_preprocess.py
+uv run --locked python scripts/test.py
+uv run --locked python scripts/train.py
 ```
 
-The Jupyter environment is ready for development. Add runnable analysis commands here as the scripts are implemented; the current placeholder scripts do not produce analysis results.
+In Bash, `bash scripts/pipeline.sh` runs the same three stages, including both PCA fits. To also write the two interactive reports, use `bash scripts/pipeline.sh --plots`. In PowerShell, append `--plots` to each of the last two Python commands above. Double-click the resulting HTML files to explore them offline. Supply `--download-date YYYY-MM-DD` to the pipeline or preprocessing step when the actual download date is known.
 
-Jupyter 环境可用于开发。后续实现脚本时，请同步在这里补充可运行的分析命令；目前的占位脚本尚不产出分析结果。
+在 Bash 中，`bash scripts/pipeline.sh` 默认完成三个阶段和两组 PCA。需要生成两份交互报告时，使用 `bash scripts/pipeline.sh --plots`。在 PowerShell 中，给上面后两条 Python 命令分别加上 `--plots` 即可。生成后双击 HTML 可离线查看。已知实际下载日期时，可向流水线或预处理脚本传入 `--download-date YYYY-MM-DD`。
+
+| Where to look / 输出位置 | What to inspect / 阅读方式 |
+| --- | --- |
+| `data/processed/` | `preprocessing_audit.json` records the source checksum, cleaning decisions and fill values. The three views are `observed.csv`, `complete_case.csv` and `imputed.csv`. In `missing_mask.csv`, 1 identifies an originally missing cell / 审计文件记录来源校验值、清洗决策及各列填充值。三张视角表共用原始行号，缺失矩阵中 1 表示原本缺失 |
+| `outputs/group_composition.csv`, `outputs/missing_rates.csv` | Compare each group's share within a view and the fraction retained from its original group / 区分某组占当前视角的比例与该组自身的保留率 |
+| `outputs/distribution_summary.csv`, `outputs/extreme_observations.csv`, `outputs/correlations.csv` | Read spread and concentration alongside the sample composition. Each correlation uses observations available for that pair / 结合样本构成解读离散与集中程度。每对相关系数使用该对指标共同有效的记录 |
+| `outputs/clinical_strata.csv` | Five clinical comparisons within each recorded diagnosis group. Read them side by side in `cohort.html` with `--plots`. / 分诊断组查看五项医学比较，启用 `--plots` 后可在队列报告中并排核对分层人数、实测与填补数及分位数 |
+| `outputs/log_comparison.csv`, `outputs/patient_features_*.csv`, `outputs/scale_parameters.csv` | Inspect log eligibility and paired skewness, then compare patient measurements on raw and standardized scales / 查看对数变换适用条件及配对样本的偏度，再对照同一批患者的原尺度与标准化结果 |
+| `outputs/pca_scores.csv`, `outputs/pca_variance.csv`, `outputs/pca_loadings.csv` | Scores, explained variance and feature loadings for the two default PCA fits / 两组 PCA 默认输出的得分、解释方差及特征载荷 |
+| `outputs/figures/cohort.html`, `outputs/figures/scales.html` | With `--plots`, the first report traces patients, distributions and associations. The second explores measurement scales and PCA. Each file contains its own data and controls / 启用 `--plots` 后，第一份报告展示患者去留、分布和关联，第二份展示尺度与 PCA。两者均内嵌所需数据和控件 |
+
+The summary tables use sample standard deviations. Extreme-value flags use Tukey's 1.5 × IQR fences across all patients in each view and retain the source row ID. The log comparison includes a measurement when it has at least three observed values, all positive, with positive sample skewness. Standardization uses the imputed cohort's mean and population standard deviation for each feature.
+
+描述统计采用样本标准差。极端值按各视角全体患者的 1.5 × IQR 箱线图规则标记，表中保留原始行号供复核。一项指标至少有三个有效观测、全部为正且样本偏度大于零时，才比较同批患者的原值与自然对数。标准化使用填补后全队列中各变量的均值与总体标准差。
+
+For a separate run, choose a new `--output-dir` and `--processed-dir`. Optional files from earlier runs stay in their original directory. Use `uv run --locked jupyter lab` for interactive inspection.
+
+若需分开保存多次运行，为各次运行设置独立的 `--output-dir` 和 `--processed-dir`。此前生成的可选结果保存在原目录中。交互式查看可使用 `uv run --locked jupyter lab`。
 
 ## Environment and dependency management / 环境与依赖管理
 
@@ -213,9 +286,9 @@ Jupyter 环境可用于开发。后续实现脚本时，请同步在这里补充
 | `requirements.txt` | Generated export of all dependency groups from `uv.lock`, with exact versions and hashes / 从 `uv.lock` 导出的全部依赖组，包含精确版本与哈希 |
 | `.venv/` | Local environment created by uv; excluded from Git / uv 创建的本地环境，不提交到 Git |
 
-The analysis dependencies are **NumPy, pandas, SciPy, Matplotlib, seaborn, and scikit-learn**. The default `dev` group adds **JupyterLab and ipykernel**. `scikit-learn` supports imputation, scaling, and optional PCA. This repository is configured as a non-packaged analysis project (`package = false`).
+The analysis environment includes **NumPy, pandas, SciPy, Matplotlib, seaborn, and scikit-learn**. The default `dev` group adds **JupyterLab and ipykernel**. The analysis uses pandas for imputation and scikit-learn for scaling and PCA. This repository is configured as a non-packaged analysis project (`package = false`).
 
-分析依赖包括 **NumPy、pandas、SciPy、Matplotlib、seaborn 和 scikit-learn**；默认安装的 `dev` 组包含 **JupyterLab 和 ipykernel**。`scikit-learn` 用于填补、缩放和可选的 PCA。仓库按分析项目管理，无需将自身安装为 Python 包（`package = false`）。
+分析环境包含 **NumPy、pandas、SciPy、Matplotlib、seaborn 和 scikit-learn**，默认安装的 `dev` 组包含 **JupyterLab 和 ipykernel**。分析使用 pandas 填补缺失值，使用 scikit-learn 完成标准化与 PCA。仓库按分析项目管理，无需将自身安装为 Python 包（`package = false`）。
 
 ### Routine synchronization / 日常同步
 

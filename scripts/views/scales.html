@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="zh-CN" data-register="instrument">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RenalLens · 患者与测量尺度</title>
+  <style>__REPORT_CSS__</style>
+  <style>
+    .scales { --ink:#193331; --soft:#506762; --line:#cbd5ce; --focus:#ae411e; }
+    .scales [hidden] { display:none !important; }
+    .scales .pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(12px,3vw,40px); }
+    .scales .projection { width:100%; height:auto; display:block; }
+    .scales .projection text,.scales .tails text { fill:var(--soft); font:13px sans-serif; }
+    .scales .projection .axis-name { fill:var(--ink); font-weight:600; }
+    .scales .projection .mark { cursor:pointer; }
+    .scales .projection .mark:hover { opacity:1; stroke:var(--focus); stroke-width:2; }
+    .scales .scores { color:var(--focus); font-variant-numeric:tabular-nums; }
+    .scales .legend { display:flex; flex-wrap:wrap; gap:4px 20px; }
+    .scales .subhead { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 20px; }
+    .scales .table-scroll { overflow-x:auto; }
+    .scales table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+    .scales th,.scales td { text-align:start; padding:8px; border-bottom:1px solid var(--line); white-space:nowrap; }
+    .scales .readings td:last-child { color:var(--soft); }
+    .scales .heat-strip { display:grid; grid-template-columns:max-content minmax(0,1fr); column-gap:12px; margin:12px 0; }
+    .scales .feature-names { display:grid; grid-template-rows:repeat(5,1fr); align-items:center; font-size:.85rem; }
+    .scales .raster { position:relative; }
+    .scales .raster canvas { display:block; width:100%; height:120px; image-rendering:pixelated; cursor:crosshair; }
+    .scales .raster canvas:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .scales .ruler { position:absolute; inset-block:0; width:2px; background:var(--focus); box-shadow:0 0 0 1px #fff; pointer-events:none; }
+    .scales .strip-key { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:.85rem; color:var(--soft); }
+    .scales .swatches { display:inline-flex; height:10px; }
+    .scales .swatches i { width:12px; }
+    .scales .coef-cell { width:34%; }
+    .scales .coef-cell small { display:block; color:var(--soft); }
+    .scales .coef { display:inline-block; width:calc(100% - 5em); min-width:40px; max-width:220px; height:8px; background:#e5ebe6; vertical-align:middle; margin-inline-end:8px; }
+    .scales .coef i { display:block; height:100%; background:#327474; }
+    .scales .tails { width:100%; max-width:820px; height:auto; display:block; }
+    .scales .tails .axis-name { fill:var(--ink); font-weight:600; }
+    .scales .q-key { color:var(--soft); }
+    .scales .q-key b { font-family:monospace; }
+    @media(max-width:700px) { .scales .pair { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main class="wrap scales">
+  <header>
+    <p class="eyebrow">RenalLens · 测量尺度与主成分</p>
+    <h1>换一种尺度，同一位患者在哪里？</h1>
+    <p class="lede">在任一投影中点选一位患者，同时查看另一幅图中的位置，以及构成这两个点的五项测量。</p>
+  </header>
+  <section aria-labelledby="projection-heading">
+    <div class="subhead">
+      <h2 id="projection-heading">同一批患者，两次投影</h2>
+      <label>定位患者 <select id="patient"></select></label>
+    </div>
+    <p class="legend" id="group-key"></p>
+    <div class="pair">
+      <figure>
+        <h3>保留原计量单位</h3>
+        <svg id="projection-raw" class="projection" viewBox="0 0 460 305" role="img" aria-label="原尺度 PCA 患者投影"></svg>
+        <figcaption id="score-raw" class="scores"></figcaption>
+      </figure>
+      <figure>
+        <h3>每项指标先转为 z 分数</h3>
+        <svg id="projection-zscore" class="projection" viewBox="0 0 460 305" role="img" aria-label="标准化 PCA 患者投影"></svg>
+        <figcaption id="score-zscore" class="scores"></figcaption>
+      </figure>
+    </div>
+    <p class="note" id="cohort-count"></p>
+  </section>
+  <section aria-labelledby="readings-heading">
+    <div class="subhead">
+      <h2 id="readings-heading">从投影回到患者读数</h2>
+      <label>色带尺度 <select id="strip-scale"><option value="raw">原尺度</option><option value="z">z 分数</option></select></label>
+    </div>
+    <figure>
+      <div class="heat-strip">
+        <div class="feature-names" id="strip-labels"></div>
+        <div class="raster">
+          <canvas id="strip" tabindex="0" aria-label="患者读数色带，左右方向键依原始行号切换患者"></canvas>
+          <span class="ruler" id="ruler" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div id="strip-key" class="strip-key"></div>
+      <figcaption>每列是一位患者，每行是一项指标。切换尺度时患者顺序和选中列固定。可点击色带或用左右方向键定位记录。</figcaption>
+    </figure>
+    <h3 id="record-label" aria-live="polite"></h3>
+    <div class="table-scroll"><table class="readings">
+      <thead><tr><th scope="col">指标</th><th scope="col">送入分析的值</th><th scope="col">z 分数</th><th scope="col">原始记录</th></tr></thead>
+      <tbody id="record"></tbody>
+    </table></div>
+  </section>
+  <section aria-labelledby="weights-heading">
+    <div class="subhead">
+      <h2 id="weights-heading">哪些指标定义了这条主轴？</h2>
+      <label>选择主轴 <select id="component"><option>PC1</option><option>PC2</option></select></label>
+    </div>
+    <figure>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col">指标</th><th scope="col">原尺度轴</th><th scope="col">z 分数轴</th></tr></thead>
+        <tbody id="weights"></tbody>
+      </table></div>
+      <figcaption>条长表示该指标方向系数的平方（vⱼ²），每根主轴的五项之和为 100%。轴标题中的解释方差比例衡量整根主轴保留的变异。</figcaption>
+    </figure>
+    <p class="note">结合临床指标读轴时，先比较同一主轴上肌酐、血尿素和血红蛋白的系数大小与相对正负号，再回到队列报告核对实测点与填补点。整根轴的符号可以一起翻转。患者的主成分得分仅描述这五项读数的组合；判定 CKD 分期还需病程、GFR 和白蛋白尿等临床资料。<a href="https://kdigo.org/guidelines/ckd-evaluation-and-management/">KDIGO 2024 指南</a></p>
+  </section>
+  <section aria-labelledby="log-heading">
+    <div class="subhead">
+      <h2 id="log-heading">同一条长尾，经对数变换有多长？</h2>
+      <label id="log-control">选择指标 <select id="log-feature"></select></label>
+    </div>
+    <p class="note" id="log-rule">仅纳入至少有三个原始观测、全部为正且样本偏度大于零的指标。</p>
+    <figure id="log-figure">
+      <svg id="tails" class="tails" viewBox="0 0 720 165" role="img" aria-label="原值与自然对数的配对分位位置和选中患者的实测值"></svg>
+      <p id="log-readout" class="scores"></p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col">所在分位</th><th scope="col" id="raw-unit">原值</th><th scope="col">自然对数</th></tr></thead>
+        <tbody id="quantiles"></tbody>
+      </table></div>
+      <figcaption>细刻痕表示实测值，两条线性标尺各覆盖其最小到最大值。P50、P90、P99 按原值升序取第 ⌈p × n⌉ 条实测记录，虚实线连接该记录的原值与对数值。粗线标出所选患者，原值缺失时只显示分位线。</figcaption>
+    </figure>
+  </section>
+</main>
+<script id="study-data" type="application/json">__STUDY_DATA__</script>
+<script>
+"use strict";
+const study = JSON.parse(document.getElementById("study-data").textContent);
+const patients = study.patients;
+const measures = study.measures;
+const names = {hemo:"血红蛋白", sc:"血清肌酐", bu:"血尿素", bgr:"血糖", bp:"血压"};
+const scales = ["raw", "zscore"];
+const groups = {ckd:"CKD", notckd:"非 CKD", unknown:"诊断缺失"};
+const groupSymbols = {ckd:"●", notckd:"◇", unknown:"×"};
+const fmt = new Intl.NumberFormat("zh-CN", {maximumSignificantDigits:4});
+const num = x => Number.isFinite(x) ? fmt.format(x) : "—";
+const pct = x => (100 * x).toFixed(1) + "%";
+const get = id => document.getElementById(id);
+const svgNS = "http://www.w3.org/2000/svg";
+function svg(parent, tag, attrs, label) {
+  const el = document.createElementNS(svgNS, tag);
+  for (const [key, val] of Object.entries(attrs)) el.setAttribute(key, val);
+  if (label != null) el.textContent = label;
+  parent.append(el);
+  return el;
+}
+function el(parent, tag, label) {
+  const child = document.createElement(tag);
+  if (label != null) child.textContent = label;
+  parent.append(child);
+  return child;
+}
+function tableRow(body, heading, values) {
+  const row = el(body, "tr");
+  el(row, "th", heading).scope = "row";
+  for (const value of values) el(row, "td", value);
+  return row;
+}
+function ticks(lo, hi) {
+  const approx = (hi - lo) / 4;
+  const power = 10 ** Math.floor(Math.log10(approx));
+  const step = [1, 2, 5, 10].find(n => n * power >= approx) * power;
+  const values = [];
+  for (let i = Math.ceil(lo / step); i <= Math.floor(hi / step); i++) values.push(i * step);
+  return values;
+}
+const patientPicker = get("patient");
+const projectionLayers = {};
+let activeIndex = 0;
+
+function drawProjection(scale) {
+  const chart = get("projection-" + scale);
+  const scores = patients.map(p => p.scores[scale]);
+  const xs = scores.map(s => s[0]), ys = scores.map(s => s[1]);
+  const xlo = Math.min(...xs), xhi = Math.max(...xs), ylo = Math.min(...ys), yhi = Math.max(...ys);
+  const left = 52, right = 439, top = 27, bottom = 253;
+  // The two axes share one unit length inside a panel; each PCA fit has its own range.
+  const unit = 1.1 * (Math.max((xhi - xlo) / (right - left), (yhi - ylo) / (bottom - top)) || 1);
+  const xmid = (xlo + xhi) / 2, ymid = (ylo + yhi) / 2;
+  const x = v => (left + right) / 2 + (v - xmid) / unit;
+  const y = v => (top + bottom) / 2 - (v - ymid) / unit;
+  const xhalf = unit * (right - left) / 2, yhalf = unit * (bottom - top) / 2;
+  for (const v of ticks(xmid - xhalf, xmid + xhalf)) {
+    svg(chart,"line",{x1:x(v),x2:x(v),y1:top,y2:bottom,stroke:v === 0 ? "#a3b3ab" : "#e1e7e1"});
+    svg(chart,"text",{x:x(v),y:bottom + 17,"text-anchor":"middle"},num(v));
+  }
+  for (const v of ticks(ymid - yhalf, ymid + yhalf)) {
+    svg(chart,"line",{x1:left,x2:right,y1:y(v),y2:y(v),stroke:v === 0 ? "#a3b3ab" : "#e1e7e1"});
+    svg(chart,"text",{x:left - 6,y:y(v) + 4,"text-anchor":"end"},num(v));
+  }
+  const variance = study.variance.filter(row => row.scale === scale);
+  function axisName(pc) {
+    const row = variance.find(r => r.component === pc);
+    return pc + " · " + pct(row.explained_fraction) + " 解释方差";
+  }
+  svg(chart,"text",{x:left,y:16,class:"axis-name"},axisName("PC2"));
+  svg(chart,"text",{x:right,y:bottom + 40,"text-anchor":"end",class:"axis-name"},axisName("PC1"));
+  patients.forEach((p,i) => {
+    const [a,b] = scores[i], px = x(a), py = y(b);
+    const mark = svg(chart,"g",{class:"mark","data-index":i,opacity:0.68,transform:"translate(" + px + " " + py + ")"});
+    if (p.group === "ckd") svg(mark,"circle",{r:3.4,fill:"#29706e"});
+    else if (p.group === "notckd") svg(mark,"path",{d:"M 0 -4 L 4 0 L 0 4 L -4 0 Z",fill:"#f7faf7",stroke:"#455775","stroke-width":1.3});
+    else svg(mark,"path",{d:"M -3 -3 L 3 3 M -3 3 L 3 -3",stroke:"#5b5651","stroke-width":1.7});
+    svg(mark,"title",{},"行 " + p.id + " · " + groups[p.group] + " · PC1 " + num(a) + " · PC2 " + num(b));
+  });
+  chart.addEventListener("click", event => {
+    const mark = event.target.closest(".mark");
+    if (mark) selectPatient(Number(mark.dataset.index));
+  });
+  const selected = svg(chart,"g",{"pointer-events":"none"});
+  svg(selected,"circle",{r:7.7,fill:"none",stroke:"#fff","stroke-width":5});
+  svg(selected,"circle",{r:7.7,fill:"none",stroke:"#ae411e","stroke-width":2.5});
+  projectionLayers[scale] = {selected, x, y};
+}
+
+function showWeights() {
+  const pc = get("component").value, body = get("weights");
+  body.replaceChildren();
+  for (const f of measures) {
+    const row = tableRow(body, names[f], []);
+    for (const scale of scales) {
+      const metric = study.loadings.find(r => r.scale === scale && r.component === pc && r.feature === f);
+      const fraction = metric.eigenvector_weight ** 2;
+      const cell = el(row, "td");
+      cell.className = "coef-cell";
+      const track = el(cell, "span");
+      track.className = "coef";
+      track.setAttribute("aria-hidden","true");
+      el(track, "i").style.width = (Math.min(1, fraction) * 100) + "%";
+      cell.append(pct(fraction));
+      const weight = metric.eigenvector_weight;
+      el(cell, "small", "方向系数 " + (weight > 0 ? "+" : "") + num(weight));
+    }
+  }
+}
+
+function blend(a, b, t) {
+  return "rgb(" + a.map((v,i) => Math.round(v + (b[i] - v) * t)).join(",") + ")";
+}
+const pale = [244,246,239], blue = [32,86,116], rust = [142,66,32];
+function drawStrip() {
+  const key = get("strip-scale").value;
+  const all = patients.flatMap(p => measures.map(f => p[key][f]));
+  const range = Math.max(...all.map(Math.abs)) || 1;
+  const lo = key === "raw" ? Math.min(...all) : -range;
+  const hi = key === "raw" ? Math.max(...all) : range;
+  const color = value => key === "raw" ? blend(pale,blue,(value - lo) / (hi - lo || 1))
+    : blend(pale,value < 0 ? blue : rust,Math.abs(value) / range);
+  const strip = get("strip");
+  strip.width = patients.length; strip.height = measures.length;
+  const ctx = strip.getContext("2d");
+  patients.forEach((p,i) => measures.forEach((f,j) => {
+    ctx.fillStyle = color(p[key][f]);
+    ctx.fillRect(i,j,1,1);
+  }));
+  const legend = get("strip-key");
+  legend.replaceChildren();
+  el(legend, "span", key === "raw" ? "共用原值色标，各行单位见下表" : "z 分数色标，浅色为零");
+  el(legend, "span", num(lo));
+  const swatches = el(legend,"span");
+  swatches.className = "swatches"; swatches.setAttribute("aria-hidden","true");
+  for (let i = 0; i <= 12; i++) el(swatches,"i").style.backgroundColor = color(lo + i * (hi - lo) / 12);
+  el(legend, "span",num(hi));
+}
+
+const logPicker = get("log-feature");
+const logSeries = new Map();
+for (const r of study.log_pairs) {
+  if (!logSeries.has(r.feature)) logSeries.set(r.feature, []);
+  logSeries.get(r.feature).push(r);
+}
+for (const [f, rows] of logSeries) {
+  rows.sort((a,b) => a.raw - b.raw || a.row_id - b.row_id);
+  logPicker.add(new Option(names[f], f));
+}
+function showTails() {
+  if (!logSeries.size) return;
+  const f = logPicker.value, rows = logSeries.get(f), patient = patients[activeIndex];
+  const first = rows[0], last = rows[rows.length - 1];
+  const chart = get("tails"), body = get("quantiles");
+  chart.replaceChildren(); body.replaceChildren();
+  const x = (row,key) => 97 + 582 * (row[key] - first[key]) / (last[key] - first[key] || 1);
+  const track = {raw:48, ln:116};
+  for (const [key,y] of Object.entries(track)) {
+    svg(chart,"line",{x1:97,x2:679,y1:y,y2:y,stroke:"#6a817c"});
+    svg(chart,"text",{x:8,y:y + 4,class:"axis-name"},key === "raw" ? "原值" : "自然对数");
+    const rug = rows.map(r => "M" + x(r,key).toFixed(2) + "," + (y - 4) + "v8").join(" ");
+    svg(chart,"path",{d:rug,fill:"none",stroke:"#839c97","stroke-width":1});
+    const tickY = key === "raw" ? y - 13 : y + 22;
+    svg(chart,"text",{x:97,y:tickY,"text-anchor":"start"},num(first[key]));
+    svg(chart,"text",{x:679,y:tickY,"text-anchor":"end"},num(last[key]));
+  }
+  get("raw-unit").textContent = "原值（" + study.units[f] + "）";
+  const ranks = [
+    {label:"P50", fraction:0.5, dash:"none", symbol:"━"},
+    {label:"P90", fraction:0.9, dash:"7 4", symbol:"┅"},
+    {label:"P99", fraction:0.99, dash:"2 3", symbol:"┈"}
+  ];
+  function connect(r,color,width,dash) {
+    svg(chart,"line",{x1:x(r,"raw"),y1:track.raw,x2:x(r,"ln"),y2:track.ln,stroke:color,"stroke-width":width,"stroke-dasharray":dash});
+  }
+  for (const q of ranks) {
+    const r = rows[Math.ceil(q.fraction * rows.length) - 1];
+    connect(r,"#335a59",1.6,q.dash);
+    tableRow(body, q.symbol + " " + q.label, [num(r.raw),num(r.ln)]);
+  }
+  const paired = rows.find(r => String(r.row_id) === String(patient.id));
+  let selectedText = "当前患者原记录缺失此项。";
+  if (paired) {
+    connect(paired,"#ae411e",3,"none");
+    for (const [key,y] of Object.entries(track)) svg(chart,"circle",{cx:x(paired,key),cy:y,r:4.4,fill:"#ae411e",stroke:"#fff","stroke-width":1});
+    selectedText = "行 " + patient.id + " 的实测值 " + num(paired.raw) + " " + study.units[f] + "，自然对数 " + num(paired.ln) + "。";
+  }
+  get("log-readout").textContent = names[f] + "，配对 n = " + rows.length + "。" + selectedText;
+}
+
+function selectPatient(index) {
+  activeIndex = index;
+  patientPicker.selectedIndex = index;
+  const p = patients[index];
+  for (const scale of scales) {
+    const {selected,x,y} = projectionLayers[scale];
+    const [a,b] = p.scores[scale];
+    selected.setAttribute("transform","translate(" + x(a) + " " + y(b) + ")");
+    get("score-" + scale).textContent = "行 " + p.id + " · PC1 " + num(a) + " · PC2 " + num(b);
+  }
+  get("record-label").textContent = "行 " + p.id + " · " + groups[p.group];
+  get("ruler").style.left = "calc(" + (100 * (index + 0.5) / patients.length) + "% - 1px)";
+  const record = get("record");
+  record.replaceChildren();
+  for (const f of measures) {
+    const source = p.missing.includes(f) ? "◇ 中位数填补" : "● 实测";
+    tableRow(record, names[f] + " · " + f, [num(p.raw[f]) + " " + study.units[f], num(p.z[f]), source]);
+  }
+  showTails();
+}
+
+for (const p of patients) patientPicker.add(new Option("行 " + p.id + " · " + groups[p.group], p.id));
+get("cohort-count").textContent = "两图使用同一批 " + patients.length + " 位患者和相同的五项指标，缺失项先用中位数填补。诊断标签用于标记点形。环标追踪同一条记录，两图各自拟合坐标轴，距离在各自图内解读。";
+for (const [group,label] of Object.entries(groups)) {
+  const n = patients.filter(p => p.group === group).length;
+  if (n) el(get("group-key"),"span",groupSymbols[group] + " " + label + "（n = " + n + "）");
+}
+el(get("group-key"),"span","◎ 选中患者");
+for (const f of measures) el(get("strip-labels"), "span", names[f]);
+for (const scale of scales) drawProjection(scale);
+showWeights();
+drawStrip();
+if (!logSeries.size) {
+  get("log-figure").hidden = true;
+  get("log-control").hidden = true;
+  get("log-rule").append(" 本队列没有符合条件的指标。");
+}
+selectPatient(0);
+patientPicker.addEventListener("change", () => selectPatient(patientPicker.selectedIndex));
+get("component").addEventListener("change", showWeights);
+get("strip-scale").addEventListener("change", drawStrip);
+logPicker.addEventListener("change", showTails);
+get("strip").addEventListener("click", event => {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const index = Math.floor((event.clientX - rect.left) / rect.width * patients.length);
+  selectPatient(Math.min(patients.length - 1, Math.max(0, index)));
+});
+get("strip").addEventListener("keydown", event => {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  event.preventDefault();
+  const step = event.key === "ArrowRight" ? 1 : -1;
+  selectPatient(Math.min(patients.length - 1, Math.max(0,activeIndex + step)));
+});
+</script>
+</body>
+</html>
