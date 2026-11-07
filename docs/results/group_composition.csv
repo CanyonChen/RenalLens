@@ -1,0 +1,7 @@
+view,group,n_view,n_original_group,n_group,n_lost,share_of_view,within_group_retention
+observed,ckd,400,250,250,0,0.625,1.0
+observed,notckd,400,150,150,0,0.375,1.0
+complete_case,ckd,158,250,43,207,0.2721518987341772,0.172
+complete_case,notckd,158,150,115,35,0.7278481012658228,0.7666666666666667
+imputed,ckd,400,250,250,0,0.625,1.0
+imputed,notckd,400,150,150,0,0.375,1.0

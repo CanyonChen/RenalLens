@@ -12,9 +12,11 @@ RenalLens 是香港城市大学 **DSC5002 — 探索性数据分析与可视化*
 
 ## Project status / 项目状态
 
-**2026-11-07** · The pipeline includes five clinically motivated comparisons within the recorded CKD and non-CKD groups, alongside the missing-data and PCA analyses. The scripts and reports have been checked statically. The full analysis, browser review and interpretation of new results are pending.
+**2026-11-07** · The completed CPU run covers 400 records, the three missing-data views, five clinical comparisons and two PCA fits. Requiring complete records reduced the pooled median creatinine from 1.30 to 1.10 mg/dL. Within the CKD group it rose from 2.25 to 4.10 mg/dL, with 43 of 250 patients retained. The standalone report includes eight downloadable figures and a creatinine–urea sensitivity analysis. [Clinical results](docs/clinical_report.html)
 
-**2026-11-07** · 已在缺失处理和 PCA 分析中加入医学解读，并在原始 CKD、非 CKD 两组内实现五项临床分层比较。脚本与报告模板已做静态检查，全量实验、浏览器验图及新结果解读待后续完成。下方样本数来自提案中的初步核查。
+**2026-11-07** · 已在 CPU 上完成 400 条记录的全量分析。完整病例筛选后，总体肌酐中位数从 1.30 降到 1.10 mg/dL，CKD 组内从 2.25 升到 4.10 mg/dL，该组仅保留 43/250 人。医学报告包含五项临床分层比较、相关性敏感性分析和八张可下载的图。下载 HTML 后可离线打开。[医学分析与图表](docs/clinical_report.html)
+
+**Published results / 本次结果。** [15 CSV tables / 结果表](docs/results/) · [Cohort report / 患者队列](docs/results/figures/cohort.html) · [PCA report / 尺度与 PCA](docs/results/figures/scales.html) · [8 SVG figures / 矢量图](docs/results/figures/clinical/) · [Preprocessing audit / 清洗审计](docs/results/preprocessing_audit.json)
 
 | Research question / 研究问题 | Implemented evaluation / 已实现的测评 |
 | --- | --- |
@@ -45,9 +47,9 @@ We use the public [Chronic Kidney Disease dataset from the UCI Machine Learning 
 | Data-quality issues / 数据质量问题 | Missing entries, inconsistent whitespace, coded categories, and different measurement scales / 缺失项、空白字符不一致、类别编码和测量尺度差异 |
 | Data license / 数据许可 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), as stated by UCI / 依 UCI 页面标注，采用 CC BY 4.0 许可 |
 
-The proposal's preliminary audit reports **158 complete records: 43 CKD and 115 non-CKD**, after requiring all 24 explanatory variables to be present. The CKD share changes from **62.5% to 27.2%**. These are sample proportions, not estimates of population disease prevalence. See the [proposal](docs/proposal.md) for the scope of this preliminary observation.
+The full run confirmed the preliminary counts in the proposal. Requiring all 24 explanatory variables retained **158 complete records (43 CKD and 115 non-CKD)**. CKD accounted for **62.5% of the original sample and 27.2% of complete cases**. These percentages describe the study sample. [Clinical results](docs/clinical_report.html#selection)
 
-提案中的初步核查表明：要求全部 24 个解释变量均有观测值后，保留 **158 条完整记录，其中 CKD 组 43 条、非 CKD 组 115 条**，CKD 样本占比从 **62.5% 降至 27.2%**。这些数值描述样本构成，不能用于估计总体患病率。该初步观察的具体范围见[提案](docs/proposal.md)。
+全量运行复核了提案中的样本数。要求全部 24 项特征齐全后，保留 **158 条记录（CKD 43 条，非 CKD 115 条）**，CKD 样本占比从 **62.5% 降至 27.2%**。这些比例的分母是本研究样本。[患者去留与缺失矩阵](docs/clinical_report.html#selection)
 
 ## Planned analysis / 分析计划
 
@@ -74,9 +76,9 @@ The proposal's preliminary audit reports **158 complete records: 43 CKD and 115 
 
 ### Clinical interpretation / 医学分析
 
-The proposal's preliminary counts give a clinical reason to examine selection first. Requiring all 24 features retained 43 of 250 CKD records (17.2%) and 115 of 150 non-CKD records (76.7%). A shift in pooled creatinine or hemoglobin can therefore reflect a different mix of patients. The records alone do not establish why a test was missing or how ill the excluded patients were.
+A pooled change masks an opposite change within CKD. The pooled median hemoglobin rose from 12.65 to 14.25 after deletion, while the CKD median fell from 10.90 (204 measured) to 9.80 (43 complete). The available records do not establish why a test was missing. [Clinical results](docs/clinical_report.html)
 
-先看哪些患者还在分析中。按提案初核，完整病例筛选保留了原 CKD 组的 **43/250（17.2%）**，非 CKD 组的 **115/150（76.7%）**。即使没有一个人的实测值改变，总体肌酐或血红蛋白的分布也可能因两组构成改变而移动。病例被删除的原因、被删除者是否病情更重，均需额外证据。[项目提案](docs/proposal.md)
+删行后，全体血红蛋白中位数由 12.65 升至 14.25，但 CKD 组内由 10.90（204 人实测）降至 9.80（43 人完整）。应结合各组保留率解读合并结果。检查为何缺失，还需要就诊流程与病历资料。[医学结果报告](docs/clinical_report.html)
 
 Within each recorded diagnosis group, the following comparisons use the clinical context as **originally recorded**. An unrecorded history or albumin grade has its own row in all three views. Each cell reports the stratum size, the measured and imputed counts, and the median with the 25th and 75th percentiles. These are unadjusted, cross-sectional descriptions.
 
@@ -254,9 +256,13 @@ uv run --locked python scripts/test.py
 uv run --locked python scripts/train.py
 ```
 
-In Bash, `bash scripts/pipeline.sh` runs the same three stages, including both PCA fits. To also write the two interactive reports, use `bash scripts/pipeline.sh --plots`. In PowerShell, append `--plots` to each of the last two Python commands above. Double-click the resulting HTML files to explore them offline. Supply `--download-date YYYY-MM-DD` to the pipeline or preprocessing step when the actual download date is known.
+In Bash, `bash scripts/pipeline.sh` runs the same three stages, including both PCA fits. Run `bash scripts/pipeline.sh --plots` for the two interactive reports, eight clinical SVG figures and sensitivity table. In PowerShell, add `--plots` to the last two commands above and then run the figure command below. Open the resulting HTML files offline. Supply `--download-date YYYY-MM-DD` when the actual download date is known.
 
-在 Bash 中，`bash scripts/pipeline.sh` 默认完成三个阶段和两组 PCA。需要生成两份交互报告时，使用 `bash scripts/pipeline.sh --plots`。在 PowerShell 中，给上面后两条 Python 命令分别加上 `--plots` 即可。生成后双击 HTML 可离线查看。已知实际下载日期时，可向流水线或预处理脚本传入 `--download-date YYYY-MM-DD`。
+在 Bash 中，`bash scripts/pipeline.sh --plots` 会重新生成两份交互报告、八张医学 SVG 图和敏感性结果表。在 PowerShell 中，给上面后两条命令分别加上 `--plots`，随后运行下列命令，可同时把图嵌入经医学解读的单文件报告。报告正文对应当前 UCI 原表的 SHA-256。已知下载日期时，可向预处理脚本传入 `--download-date YYYY-MM-DD`。
+
+```sh
+uv run --locked python scripts/clinical_figures.py --report outputs/clinical_report.html
+```
 
 | Where to look / 输出位置 | What to inspect / 阅读方式 |
 | --- | --- |
@@ -266,6 +272,7 @@ In Bash, `bash scripts/pipeline.sh` runs the same three stages, including both P
 | `outputs/clinical_strata.csv` | Five clinical comparisons within each recorded diagnosis group. Read them side by side in `cohort.html` with `--plots`. / 分诊断组查看五项医学比较，启用 `--plots` 后可在队列报告中并排核对分层人数、实测与填补数及分位数 |
 | `outputs/log_comparison.csv`, `outputs/patient_features_*.csv`, `outputs/scale_parameters.csv` | Inspect log eligibility and paired skewness, then compare patient measurements on raw and standardized scales / 查看对数变换适用条件及配对样本的偏度，再对照同一批患者的原尺度与标准化结果 |
 | `outputs/pca_scores.csv`, `outputs/pca_variance.csv`, `outputs/pca_loadings.csv` | Scores, explained variance and feature loadings for the two default PCA fits / 两组 PCA 默认输出的得分、解释方差及特征载荷 |
+| `outputs/renal_sensitivity.csv`, `outputs/figures/clinical/*.svg` | Observed creatinine–urea pairs by diagnosis and after omitting one maximum creatinine reading, plus eight reusable figures / 分诊断组及暂不计肌酐最高一条记录的成对实测结果，以及八幅可用于报告的矢量图 |
 | `outputs/figures/cohort.html`, `outputs/figures/scales.html` | With `--plots`, the first report traces patients, distributions and associations. The second explores measurement scales and PCA. Each file contains its own data and controls / 启用 `--plots` 后，第一份报告展示患者去留、分布和关联，第二份展示尺度与 PCA。两者均内嵌所需数据和控件 |
 
 The summary tables use sample standard deviations. Extreme-value flags use Tukey's 1.5 × IQR fences across all patients in each view and retain the source row ID. The log comparison includes a measurement when it has at least three observed values, all positive, with positive sample skewness. Standardization uses the imputed cohort's mean and population standard deviation for each feature.

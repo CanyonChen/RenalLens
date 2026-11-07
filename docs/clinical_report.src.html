@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN" data-register="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RenalLens · 缺失记录怎样改变 CKD 的临床图景</title>
+<link rel="stylesheet" href="kit.css" data-ve-kit>
+<style>
+:root { color-scheme:light; --ink:#183532; --muted:#4f6763; --teal:#146a61; --rust:#984426; --rule:#c9d8d2; }
+* { box-sizing:border-box }
+html { scroll-behavior:smooth; scroll-padding-top:1rem }
+body { margin:0; background:#fcfcf8; color:var(--ink); font:16px/1.78 "Source Sans 3","Microsoft YaHei","PingFang SC",sans-serif; font-variant-numeric:tabular-nums }
+main.study { width:min(100%,1080px); max-width:1080px; margin:auto; padding:26px clamp(18px,4vw,60px) 48px }
+.study :is(h1,h2,h3,p,figure) { margin:0 }
+.study :is(h1,h2) { font-family:"STIX Two Text","Noto Serif CJK SC","Songti SC",SimSun,serif; color:var(--ink); text-wrap:balance }
+.study h1 { font-size:clamp(30px,4.3vw,57px); line-height:1.24; letter-spacing:-.035em; max-width:19em }
+.study h2 { font-size:clamp(24px,3vw,34px); line-height:1.34; margin:6px 0 12px }
+.study h3 { font-size:1.04rem; margin:14px 0 3px }
+.study p { max-width:78ch }
+.study a { color:var(--teal); text-underline-offset:3px }
+.mast { display:flex; justify-content:space-between; align-items:baseline; gap:1em; flex-wrap:wrap; border-bottom:1px solid var(--ink); padding-bottom:8px; margin-bottom:22px; color:var(--muted); font-size:.84rem }
+.mast b { color:var(--ink); font:700 1.25rem Georgia,serif; letter-spacing:.02em }
+.study header { padding:0; margin:0; border:none }
+.study .lead { margin:12px 0 8px; font-size:1.12rem; color:var(--ink) }
+.study section { padding:32px 0 0; margin:30px 0 0; border-top:1px solid var(--rule) }
+.study .label { color:var(--teal); font-size:.82rem; font-weight:700; letter-spacing:.07em }
+.study .keyline { margin:12px 0 5px; font-size:.91rem; color:var(--muted) }
+.study figure { margin:12px 0 14px; padding:0; min-width:0; border:0; background:transparent }
+.study figure img { display:block; width:100%; height:auto; background:white; border:1px solid #dce6df }
+.study figcaption { font-size:.91rem; line-height:1.6; color:var(--muted); padding-top:6px; max-width:86ch }
+.study figure button { display:block; width:100%; padding:0; border:0; background:none; cursor:zoom-in }
+.study button:focus-visible,.study a:focus-visible,.study summary:focus-visible { outline:3px solid var(--rust); outline-offset:3px }
+.study nav { display:flex; gap:6px 20px; flex-wrap:wrap; margin-top:14px }
+.study nav a { font-size:.9rem }
+.study .twocol { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 26px }
+.study .evidence { background:#edf3ef; padding:12px 16px; margin:12px 0; font-size:.96rem }
+.study .sources { font-size:.91rem }
+.study .sources p + p { margin-top:9px }
+.study code { font-size:.85em; color:var(--ink); overflow-wrap:anywhere }
+.study details { margin:12px 0; padding:8px 0; border-block:1px solid var(--rule) }
+.study summary { cursor:pointer; font-weight:650 }
+.table-wrap { overflow-x:auto }
+.study table { width:100%; border-collapse:collapse; font-size:.92rem; margin:6px 0 }
+.study th,.study td { padding:6px 8px; border-bottom:1px solid var(--rule); text-align:right; white-space:nowrap }
+.study th:first-child,.study td:first-child { text-align:left }
+.study dialog { max-width:min(1280px,96vw); width:96vw; max-height:94vh; padding:15px; color:var(--ink); border:1px solid var(--rule); background:white }
+.study dialog::backdrop { background:rgba(16,35,33,.7) }
+.zoom-tools { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px }
+.zoom-tools button { font:inherit; cursor:pointer; background:#edf3ef; border:1px solid var(--rule); padding:3px 12px }
+.zoom-image { overflow:auto }
+.zoom-image img { display:block; width:100%; min-width:760px; height:auto }
+@media(max-width:680px) { .study .twocol { grid-template-columns:1fr } .study section { padding-top:20px; margin-top:20px } }
+@media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto } }
+@media print { body { background:white } .study nav,.study dialog,.zoom-hint { display:none } .study figure { break-inside:avoid } main.study { width:100%; padding:0 } }
+</style>
+</head>
+<body><main class="study">
+<div class="mast"><b>RenalLens</b><span>DSC5002 · UCI 慢性肾病队列 · 2026 年 11 月 7 日</span></div>
+<header>
+<h1>删去缺项后，为什么全体肌酐下降，CKD 组内却升高？</h1>
+<p class="lead">要求 24 项特征齐全后，400 人只留下 158 人。全体血清肌酐中位数从 <b>1.30 降到 1.10 mg/dL</b>，留下的慢性肾病（CKD）患者却从原组的 <b>2.25 升到 4.10 mg/dL</b>。两次比较换了分母。</p>
+</header>
+<p class="keyline">○ 逐项实测　◆ 完整病例　｜　组名旁为该指标的有效人数<span class="zoom-hint">　·　点击图可放大</span></p>
+<figure><img src="results/figures/clinical/selection.svg" width="1000" height="292" alt="按全体、CKD 和非 CKD 分别比较删行前后的肌酐与血红蛋白中位数。"><figcaption>血红蛋白也出现相反方向。全体中位数从 12.65 升到 14.25，CKD 组内从 10.90 降到 9.80；非 CKD 组两项指标的中位数均持平。</figcaption></figure>
+<nav aria-label="报告章节"><a href="#selection">患者去留</a><a href="#imputation">填补影响</a><a href="#renal">肾脏指标</a><a href="#comorbidity">合并症</a><a href="#association">相关性</a><a href="#scales">尺度与 PCA</a><a href="#method">方法与来源</a></nav>
+
+<section id="selection"><p class="label">样本构成</p><h2>完整病例筛选留下了 17.2% 的 CKD 患者</h2>
+<p>CKD 组保留 43/250 人，非 CKD 组保留 115/150 人（76.7%）。剔除的 242 人中有 207 人带有 CKD 标签。CKD 在样本中的占比由 62.5% 降至 27.2%。这既改变两组权重，也改变 CKD 组内留下的患者构成，因而总体中位数与组内中位数可以朝相反方向移动。</p>
+<figure><img src="results/figures/clinical/missingness.svg" width="1000" height="580" alt="400 人乘 24 项的原始缺失矩阵，按诊断分块，并列出各字段缺失比例。"><figcaption>每列一人，绿格表示缺失。24 项共缺 1,012/9,600 格（10.5%）。红细胞评估 rbc 缺 152 项，其中 CKD 组 143/250（57.2%），非 CKD 组 9/150（6.0%）。红细胞计数 rbcc 是另一个变量。</figcaption></figure>
+<p>原始记录没有给出检查缺失的原因，也没有抽样权重。上述比例描述这批就诊记录；从中估计地区患病率或判断缺失机制，还需要抽样与就诊流程资料。</p></section>
+
+<section id="imputation"><p class="label">缺失值处理</p><h2>填补把 52 条血红蛋白记录放在同一点</h2>
+<figure><img src="results/figures/clinical/hemoglobin_distribution.svg" width="1050" height="360" alt="血红蛋白三种视角的相对频率直方图与经验累积分布，填补后在 12.65 处出现台阶。"><figcaption>三种策略使用相同分箱和横轴，各自按有效人数归一化。虚线竖标所在的 12.65 是 348 个实测值的中位数；原始记录中恰好取此值的有 0 人，填补后有 52/400 人（13.0%）。</figcaption></figure>
+<p>中位数保持 12.65，但中间 50% 的范围从 10.30–15.00 收窄至约 10.88–14.63。图中的台阶来自同一个替代值被重复使用。将这些填补值用于相关性或分层比较时，有效用于计算的人数会增加，实际完成检验的人数仍为 348。</p></section>
+
+<section id="renal"><p class="label">肾脏指标 · CKD 组内</p><h2>白蛋白等级较高的几组，肌酐中位数也较高</h2>
+<figure><img src="results/figures/clinical/albumin_grades.svg" width="1040" height="380" alt="CKD 组按白蛋白原始等级显示肌酐和血尿素的实测中位数、四分位区间与样本数。"><figcaption>横线覆盖 Q1–Q3，标记为中位数；人数为实测数/层内人数。0–4 级的肌酐中位数依次为 1.30、1.80、2.50、2.70、4.05 mg/dL。5 级仅一人，以菱形单列。</figcaption></figure>
+<p>血尿素在 3 级和 4 级的中位数分别为 71 和 57 mg/dL，四分位区间重叠。另有 41 名 CKD 患者的白蛋白等级未记录，其中 41 人有肌酐实测值，中位数 3.40 mg/dL。把这些人归入 0 级会改变对照组的临床含义。</p>
+<p>肌酐受滤过功能与肌肉量等因素影响，血尿素也受容量状态影响。UCI 的 <code>al</code> 只给 0–5 级，<code>bu</code> 定义为血尿素。定量尿白蛋白/肌酐比（uACR）和纵向复测均缺失，无法由此重建 KDIGO 分期。<a href="https://archive.ics.uci.edu/dataset/336/chronic+kidney+disease">UCI 字典</a> · <a href="https://www.niddk.nih.gov/research-funding/research-programs/kidney-clinical-research-epidemiology/laboratory/factors-affecting-egfr-accuracy/clinical-measurements">NIDDK 肌酐</a> · <a href="https://www.southtees.nhs.uk/services/pathology/tests/Urea/">NHS 尿素</a> · <a href="https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf#page=22">KDIGO 定义与分类</a></p></section>
+
+<section id="comorbidity"><p class="label">合并症 · CKD 组内</p><h2>贫血与糖尿病分层有差异，血压中位数相同</h2>
+<figure><img src="results/figures/clinical/comorbidities.svg" width="1050" height="360" alt="CKD 组内，按贫血、糖尿病和高血压原始记录，比较对应三项指标的实测箱线图。"><figcaption>“有/无”取自原始病史标签；数字为实测人数/层内人数。箱体覆盖 Q1–Q3，须延伸至 1.5 倍四分位距界限内的最远观测，圈点为界限外保留的实测值。</figcaption></figure>
+<h3>贫血与血红蛋白</h3><p>有贫血记录者的血红蛋白为 8.60［7.80，9.70］（实测 55/60），无贫血记录者为 11.30［10.30，12.50］（149/190）。UCI 将单位记为 <code>gms</code>，未注明体积分母。肾病可通过促红细胞生成素减少等途径参与贫血；这里缺少铁代谢、炎症指标及失血史，无法据此给个体归因。<a href="https://www.niddk.nih.gov/health-information/kidney-disease/anemia">NIDDK 肾病与贫血</a></p>
+<h3>糖尿病与随机血糖</h3><p>糖尿病记录为“有”者的随机血糖为 192［125，253］mg/dL（125/137），记录为“无”者为 113［99.5，148］mg/dL（87/113）。用全队列中位数 121 填补后，两组中位数变为 172 与 121，差距由 79 缩至 51 mg/dL。症状、进餐时间和 HbA1c 均未记录，分析沿用既有病史标签。<a href="https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/diabetes/diabetes-prediabetes">NIDDK 糖尿病检验</a></p>
+<h3>高血压与单次血压</h3><p>有、无高血压记录者均为 80［70，90］mmHg（145/147 与 95/103）。这个字段只有一个数，没有标明收缩压、舒张压、用药或复测条件。相同的中位数不足以判断两组血压控制相同。非 CKD 组在这三项病史的“有”层均为 0 人，故无法在该组估计相同的有无差异。<a href="https://www.who.int/news-room/fact-sheets/detail/hypertension">WHO 血压测量</a></p></section>
+
+<section id="association"><p class="label">变量关联 · 原始读数与敏感性</p><h2>删行后线性相关增强，秩相关却减弱</h2>
+<figure><img src="results/figures/clinical/correlations.svg" width="1140" height="360" alt="三种策略的 5 项指标相关矩阵，下三角为 Pearson，上三角为 Spearman。"><figcaption>下三角是 Pearson r，上三角是 Spearman ρ。肌酐与血尿素的逐对实测值为 r = 0.586、ρ = 0.703（n = 380）；完整病例为 0.896、0.478（n = 158）；填补后为 0.582、0.696（n = 400）。</figcaption></figure>
+<p>Pearson 衡量线性共变，对远离主体的点较敏感；Spearman 按秩衡量单调关联。删行同时改变了患者构成和数值范围，不能把更高的 r 单独解读为更强的生理联系。</p>
+<figure><img src="results/figures/clinical/creatinine_urea.svg" width="820" height="380" alt="380 个实测点对的肌酐与血尿素散点，按原始诊断标签分组，标出肌酐最高的行 22。"><figcaption>共同实测的 CKD 患者中 ρ = 0.840（n = 236），非 CKD 组为 −0.096（n = 144）。非 CKD 组集中在较窄的读数范围，总体相关系数无法代表两个组内关系。</figcaption></figure>
+<details open><summary>查看分组与单点敏感性计算</summary><div class="table-wrap"><table><thead><tr><th>原始实测点对</th><th>有效人数</th><th>Pearson r</th><th>Spearman ρ</th></tr></thead><tbody>
+<tr><td>全体</td><td>380</td><td>0.586</td><td>0.703</td></tr><tr><td>CKD</td><td>236</td><td>0.543</td><td>0.840</td></tr><tr><td>非 CKD</td><td>144</td><td>−0.101</td><td>−0.096</td></tr><tr><td>全体，暂不计行 22</td><td>379</td><td>0.674</td><td>0.701</td></tr></tbody></table></div></details>
+<p>行 22 的肌酐为 76.0 mg/dL、血尿素为 180 mg/dL。只在附加分析中暂不计这条记录，r 变动约 0.088，ρ 变动约 0.002。这个比较量化了全体实测结果对该点的敏感度；主分析保留原值，记录真伪需查原始化验单。</p></section>
+
+<section id="scales"><p class="label">尺度 · 相同 400 人与 5 项指标</p><h2>标准化改变了第一主成分的临床含义</h2>
+<figure><img src="results/figures/clinical/pc1_weights.svg" width="950" height="320" alt="原始尺度与标准化后 PCA 第一主成分的有符号方向系数，以及各自的解释方差。"><figcaption>原尺度 PC1 的随机血糖方向系数为 +0.990，解释方差 68.8%。标准化后 PC1 解释 43.3%，血尿素（+0.566）、血红蛋白（−0.534）和肌酐（+0.491）占较大权重。整根轴可同时翻转符号。</figcaption></figure>
+<p>两次拟合固定同一填补队列。前两轴合计解释比例由 97.6% 变为 64.3%。原尺度强调数值波动较大的血糖；标准化后同时看见较高肾脏指标与较低血红蛋白的共变。轴上位置描述样本内读数组合，不能给个体分期或预测结局。</p>
+<p>对于 383 个为正的实测肌酐值，取自然对数后样本偏度从 7.51 降到 1.03。尺度报告可定位原始行，核对极端值如何影响图形。本项目的两次 PCA 均使用未取对数的五项指标。</p></section>
+
+<section id="method" class="sources"><p class="label">研究口径与复核</p><h2>结果可以追溯到哪一步</h2>
+<p><b>设计。</b> 横断面、未调整的描述性分析。每位患者一行，原始诊断标签用于分组。逐项统计只用实测值，相关性取成对实测；完整病例要求 24 项齐全；简单填补基于全队列各数值列的中位数和分类列的众数。临床分层保留原始等级、病史及未记录状态。中括号给出四分位数，反映个体间分布。</p>
+<p><b>临床边界。</b> 年龄记录范围为 2–90 岁，数据缺少性别、纵向结果和定量 uACR。KDIGO 的慢性病程要求至少 3 个月；本次沿用 UCI 诊断标签。疾病进展、用药效应和人群风险均超出这批记录能回答的问题。<a href="https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf#page=22">KDIGO 2024 指南</a> · <a href="https://www.niddk.nih.gov/research-funding/research-programs/kidney-clinical-research-epidemiology/laboratory/glomerular-filtration-rate-equations/adults">NIDDK 成人 eGFR 公式</a></p>
+<p><b>数据归属。</b> Rubini、Soundarapandian、Eswaran，Chronic Kidney Disease（2015），UCI Machine Learning Repository，CC BY 4.0。分析基于本项目保留的 CSV；原始下载日未记录。<a href="https://doi.org/10.24432/C5G020">数据 DOI</a> · <a href="https://archive.ics.uci.edu/static/public/336/data.csv">原始 CSV</a> · <a href="https://creativecommons.org/licenses/by/4.0/">许可证</a></p>
+<p><b>数据指纹。</b> SHA-256 <code>0eeea8d17f5ad8792d854999d6ddf1602ec4e116616f6ccdfdaef0ba8109e694</code>。400 条记录清洗后未发现 25 个源字段完全相同的重复行。两组 PCA 各使用 400 人，五项临床比较均可在分层表核对分母。</p>
+<p><b>项目内核对。</b> 运行 <code>bash scripts/pipeline.sh --plots</code> 可重新计算。<code>outputs/clinical_strata.csv</code> 保留每格的实测与填补人数；<code>outputs/renal_sensitivity.csv</code> 保留分组及单点敏感性系数。交互核对患者请打开项目内的 <a href="results/figures/cohort.html">队列报告</a> 或 <a href="results/figures/scales.html">尺度与 PCA 报告</a>。本文八幅图均可点击放大并保存。</p></section>
+<dialog id="zoom"><div class="zoom-tools"><a id="save">保存 SVG 图</a><button type="button" id="dismiss">关闭大图</button></div><div class="zoom-image"><img id="large" alt=""></div></dialog>
+</main>
+<script>
+const zoom = document.getElementById("zoom");
+for (const image of document.querySelectorAll("figure img")) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.setAttribute("aria-label", "放大图：" + image.alt);
+  image.replaceWith(button);
+  button.append(image);
+  button.addEventListener("click", () => {
+    const large = document.getElementById("large");
+    large.src = image.currentSrc || image.src;
+    large.alt = image.alt;
+    const save = document.getElementById("save");
+    save.href = large.src;
+    save.download = image.dataset.filename || "RenalLens.svg";
+    zoom.showModal();
+    document.getElementById("dismiss").focus();
+  });
+}
+document.getElementById("dismiss").addEventListener("click", () => zoom.close());
+</script></body></html>

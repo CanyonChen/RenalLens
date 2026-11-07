@@ -7,7 +7,8 @@ Usage: bash scripts/pipeline.sh [--input CSV] [--processed-dir DIR] [--output-di
                                 [--download-date YYYY-MM-DD] [--plots]
 Run the RenalLens descriptive analysis. Default paths are relative to the repository
 root. Relative paths passed as arguments are resolved from the calling directory.
-Both PCA fits run by default. --plots additionally writes the two offline HTML reports.
+Both PCA fits run by default. --plots also writes two offline HTML reports, clinical
+SVG figures and the creatinine–urea sensitivity table.
 EOF
 }
 
@@ -47,3 +48,7 @@ runner=(uv run --project "$project_root" --locked python)
     --output-dir "$output_dir" "${plot_args[@]}"
 "${runner[@]}" "$project_root/scripts/train.py" --processed-dir "$processed_dir" \
     --output-dir "$output_dir" "${plot_args[@]}"
+if (( ${#plot_args[@]} )); then
+    "${runner[@]}" "$project_root/scripts/clinical_figures.py" --processed-dir "$processed_dir" \
+        --output-dir "$output_dir"
+fi

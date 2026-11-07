@@ -1,0 +1,440 @@
+{
+  "input_path": "data/raw/ckd.csv",
+  "reference_csv_url": "https://archive.ics.uci.edu/static/public/336/data.csv",
+  "dictionary_url": "https://archive.ics.uci.edu/dataset/336/chronic+kidney+disease",
+  "input_sha256": "0eeea8d17f5ad8792d854999d6ddf1602ec4e116616f6ccdfdaef0ba8109e694",
+  "download_date": null,
+  "row_id": "One-based data record position in the original CSV, excluding the header.",
+  "source_n": 400,
+  "complete_case_n": 158,
+  "imputed_n": 400,
+  "missing_markers_after_trim_and_lowercase": [
+    "",
+    "?",
+    "nan",
+    "na",
+    "n/a"
+  ],
+  "complete_case_rule": "All 24 explanatory features observed.",
+  "imputation_rule": "Column medians and categorical modes of all observed records, without diagnosis. Mode ties use the lexicographically first canonical code. Diagnosis is retained as supplied.",
+  "duplicate_rule": "Compare all 25 source fields, excluding row_id. Retain all records.",
+  "duplicates_before_cleaning": {
+    "excess_copies": 0,
+    "row_ids_in_repeated_rows": []
+  },
+  "duplicates_after_cleaning": {
+    "excess_copies": 0,
+    "row_ids_in_repeated_rows": []
+  },
+  "columns": {
+    "age": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "years",
+      "observed_n": 391,
+      "missing_n": 9,
+      "missing_tokens": {
+        "NaN": 9
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 55.0
+    },
+    "bp": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "mmHg",
+      "observed_n": 388,
+      "missing_n": 12,
+      "missing_tokens": {
+        "NaN": 12
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 80.0
+    },
+    "sg": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 353,
+      "missing_n": 47,
+      "missing_tokens": {
+        "NaN": 47
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {
+        "1.02": "1.020",
+        "1.01": "1.010"
+      },
+      "allowed_levels": [
+        "1.005",
+        "1.010",
+        "1.015",
+        "1.020",
+        "1.025"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "1.020"
+    },
+    "al": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 354,
+      "missing_n": 46,
+      "missing_tokens": {
+        "NaN": 46
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "0"
+    },
+    "su": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 351,
+      "missing_n": 49,
+      "missing_tokens": {
+        "NaN": 49
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "0"
+    },
+    "rbc": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 248,
+      "missing_n": 152,
+      "missing_tokens": {
+        "NaN": 152
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "normal",
+        "abnormal"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "normal"
+    },
+    "pc": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 335,
+      "missing_n": 65,
+      "missing_tokens": {
+        "NaN": 65
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "normal",
+        "abnormal"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "normal"
+    },
+    "pcc": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 396,
+      "missing_n": 4,
+      "missing_tokens": {
+        "NaN": 4
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "present",
+        "notpresent"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "notpresent"
+    },
+    "ba": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 396,
+      "missing_n": 4,
+      "missing_tokens": {
+        "NaN": 4
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "present",
+        "notpresent"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "notpresent"
+    },
+    "bgr": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "mg/dL",
+      "observed_n": 356,
+      "missing_n": 44,
+      "missing_tokens": {
+        "NaN": 44
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 121.0
+    },
+    "bu": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "mg/dL",
+      "observed_n": 381,
+      "missing_n": 19,
+      "missing_tokens": {
+        "NaN": 19
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 42.0
+    },
+    "sc": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "mg/dL",
+      "observed_n": 383,
+      "missing_n": 17,
+      "missing_tokens": {
+        "NaN": 17
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 1.3
+    },
+    "sod": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "mEq/L",
+      "observed_n": 313,
+      "missing_n": 87,
+      "missing_tokens": {
+        "NaN": 87
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 138.0
+    },
+    "pot": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "mEq/L",
+      "observed_n": 312,
+      "missing_n": 88,
+      "missing_tokens": {
+        "NaN": 88
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 4.4
+    },
+    "hemo": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "g (UCI)",
+      "observed_n": 348,
+      "missing_n": 52,
+      "missing_tokens": {
+        "NaN": 52
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 12.649999999999999
+    },
+    "pcv": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": null,
+      "observed_n": 329,
+      "missing_n": 71,
+      "missing_tokens": {
+        "NaN": 71
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 40.0
+    },
+    "wbcc": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "cells/cumm",
+      "observed_n": 294,
+      "missing_n": 106,
+      "missing_tokens": {
+        "NaN": 106
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 8000.0
+    },
+    "rbcc": {
+      "role": "explanatory feature",
+      "type": "numerical",
+      "unit_as_documented": "millions/cmm",
+      "observed_n": 269,
+      "missing_n": 131,
+      "missing_tokens": {
+        "NaN": 131
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "fill_value": 4.8
+    },
+    "htn": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 398,
+      "missing_n": 2,
+      "missing_tokens": {
+        "NaN": 2
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "yes",
+        "no"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "no"
+    },
+    "dm": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 398,
+      "missing_n": 2,
+      "missing_tokens": {
+        "NaN": 2
+      },
+      "trimmed_n": 1,
+      "normalized_spellings": {
+        "\tno": "no"
+      },
+      "allowed_levels": [
+        "yes",
+        "no"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "no"
+    },
+    "cad": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 398,
+      "missing_n": 2,
+      "missing_tokens": {
+        "NaN": 2
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "yes",
+        "no"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "no"
+    },
+    "appet": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 399,
+      "missing_n": 1,
+      "missing_tokens": {
+        "NaN": 1
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "good",
+        "poor"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "good"
+    },
+    "pe": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 399,
+      "missing_n": 1,
+      "missing_tokens": {
+        "NaN": 1
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "yes",
+        "no"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "no"
+    },
+    "ane": {
+      "role": "explanatory feature",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 399,
+      "missing_n": 1,
+      "missing_tokens": {
+        "NaN": 1
+      },
+      "trimmed_n": 0,
+      "normalized_spellings": {},
+      "allowed_levels": [
+        "yes",
+        "no"
+      ],
+      "tied_modal_levels": [],
+      "fill_value": "no"
+    },
+    "class": {
+      "role": "diagnosis label",
+      "type": "categorical",
+      "unit_as_documented": null,
+      "observed_n": 400,
+      "missing_n": 0,
+      "missing_tokens": {},
+      "trimmed_n": 2,
+      "normalized_spellings": {
+        "ckd\t": "ckd"
+      },
+      "allowed_levels": [
+        "ckd",
+        "notckd"
+      ]
+    }
+  }
+}
