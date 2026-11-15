@@ -1,37 +1,68 @@
 # RenalLens
 
-**How Complete-Case Analysis and Imputation Shape Patterns in Chronic Kidney Disease Data**\
-**缺失值处理对慢性肾病临床指标分布及相关性估计的影响**
+**What can a blood test add to a urine result in chronic kidney disease?**\
+**一份尿检之外，血液检查还能告诉我们什么？**
 
-RenalLens is a group project for **DSC5002 — Exploratory Data Analysis and Visualization** at City University of Hong Kong. We examine how missing-value handling changes the patients represented in a dataset, the distributions of clinical measurements, and the relationships visible in exploratory plots.
+City University of Hong Kong · DSC5002 Exploratory Data Analysis and Visualization · C61, Group 65
 
-RenalLens 是香港城市大学 **DSC5002 — 探索性数据分析与可视化**课程的小组项目。我们研究缺失值处理如何改变数据所代表的患者构成、临床指标的分布，以及探索性图表中呈现的变量关系。
+[Report / 报告](docs/report/RenalLens_Report.pdf) · [Poster / 海报](docs/poster/RenalLens_Poster.pdf) · [Slides / 离线演示](docs/presentation/deck.html) · [Slides PDF](docs/presentation/RenalLens_Presentation.pdf) · [Speaker notes / 讲稿](docs/presentation/Presenter_notes.md)
 
-**Group / 小组：C61, Group 65**\
-**Documents / 项目文档：[Bilingual proposal / 中英双语提案](docs/proposal.md) · [Proposal PDF / 提案 PDF](docs/DSC5002_CKD_Proposal.pdf)**
+## Record 43 / 第 43 号病历
 
-## Project status / 项目状态
+Record 43 carries a chronic kidney disease (CKD) label. Its urine albumin grade was **0**, the lowest grade in the dataset, and its diabetes history was recorded as **no**. What else would we learn by reading this patient's blood tests? We asked the same question of all **250 CKD records** in the 400-record UCI dataset. “43” is the original data row, counting from one after the header. [Patient measurements](docs/reanalysis/clinical_tables/patient_measurements.csv)
 
-**2026-11-07** · The completed CPU run covers 400 records, the three missing-data views, five clinical comparisons and two PCA fits. Requiring complete records reduced the pooled median creatinine from 1.30 to 1.10 mg/dL. Within the CKD group it rose from 2.25 to 4.10 mg/dL, with 43 of 250 patients retained. The standalone report includes eight downloadable figures and a creatinine–urea sensitivity analysis. [Clinical results](docs/clinical_report.html)
+第 43 号病历已经标记为慢性肾病，尿白蛋白是最低的 **0 级**，病史明确记录**无糖尿病**。如果只读到这里，会错过什么？我们把同一份病历中的尿检、血检和病史放在一起，再用另外的患者记录检验这个例子有多常见。研究纳入 UCI 数据集 400 份病历中全部 **250 份慢性肾病记录**。43 是原始数据从 1 开始计数的行号。
 
-**2026-11-07** · 已在 CPU 上完成 400 条记录的全量分析。完整病例筛选后，总体肌酐中位数从 1.30 降到 1.10 mg/dL，CKD 组内从 2.25 升到 4.10 mg/dL，该组仅保留 43/250 人。医学报告包含五项临床分层比较、相关性敏感性分析和八张可下载的图。下载 HTML 后可离线打开。[医学分析与图表](docs/clinical_report.html)
+### Why read these tests together? / 为什么要看这几项检查？
 
-**Published results / 本次结果。** [15 CSV tables / 结果表](docs/results/) · [Cohort report / 患者队列](docs/results/figures/cohort.html) · [PCA report / 尺度与 PCA](docs/results/figures/scales.html) · [8 SVG figures / 矢量图](docs/results/figures/clinical/) · [Preprocessing audit / 清洗审计](docs/results/preprocessing_audit.json)
+**Urine and blood reflect different aspects of kidney health.** Albumin is a protein normally retained in the blood. Its presence in urine can signal leakage through the kidney's filters. Creatinine is a waste product that the kidneys clear from the blood. Among 197 records with both readings, median creatinine rose from 1.30 mg/dL at urine albumin grade 0 to 4.05 at grade 4. Yet the 47 grade-0 readings alone spanned **0.6–24.0 mg/dL**. [Kidney tests explained by NIDDK](https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/tests-diagnosis)
 
-| Research question / 研究问题 | Implemented evaluation / 已实现的测评 |
-| --- | --- |
-| Q1 · Missingness and representation / 缺失与样本构成 | Original missingness by feature and patient, group counts and shares by view, and within-group retention after deletion / 按指标和患者记录原始缺失，对比三种视角的组别计数、占比及删除后的组内保留率 |
-| Q2 · Distributions and associations / 分布与关联 | Overall and group summaries of the five measurements, concentration at the observed median, paired sample sizes and Pearson/Spearman coefficients in each view / 五项指标的总体与分组统计、原始中位数处的取值集中程度，以及各视角下的成对样本量与两种相关系数 |
-| Q3 · Extremes, skewness and scale / 极端值、偏度与尺度 | Traceable extreme observations, paired raw/log values, raw/z-score patient matrices and two fixed-cohort PCA fits / 可追溯的极端观测、配对的原值与对数、患者的原尺度与标准化矩阵，以及同队列的两组 PCA |
+**先读尿检，再读肌酐。** 尿白蛋白反映本应留在血液中的蛋白是否漏入尿液。血肌酐是肌肉代谢产生的废物，其血液浓度能帮助判断肾脏清除废物的情况。197 人两项均有测量，白蛋白从 0 级到 4 级，肌酐中位数从 1.30 升到 4.05 mg/dL。但只看同为 0 级的 47 人，肌酐就横跨 **0.6–24.0 mg/dL**。因此，还需读这位患者自己的血检。[各等级的实测结果](docs/reanalysis/clinical_tables/albumin_grades.csv)
 
-## Research questions / 研究问题
+**Blood tests add two pieces of information.** Hemoglobin carries oxygen in red blood cells, and the kidneys help signal the body to make these cells. Across 198 patients with both readings, twice the creatinine was associated with a 0.90-unit lower mean hemoglobin on the dataset's scale. Blood glucose matters because prolonged high levels can damage the kidneys. A diabetes history describes a prior diagnosis, while a random glucose test measures blood sugar at the time of sampling. Among patients with measured glucose, **11/87 (12.6%)** with no recorded diabetes and **61/125 (48.8%)** with a history reached 200 mg/dL. [Kidney disease and anemia](https://www.niddk.nih.gov/health-information/kidney-disease/anemia) · [Diabetes and kidney health](https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/diabetic-kidney-disease)
 
-1. **Missingness and representation.** Which variables have the most missing values, and how does complete-case deletion change the composition of the CKD and non-CKD groups?\
-   **缺失情况与样本代表性。** 哪些变量缺失最多？删除不完整记录后，CKD 组与非 CKD 组的样本构成如何变化？
-2. **Distributions and associations.** How do complete-case analysis and simple imputation affect selected clinical measurements and their relationships?\
-   **分布与变量关联。** 完整病例分析和简单填补会怎样影响所选临床指标的分布及相互关系？
-3. **Interpretation of plots.** How do skewness, extreme observations, transformations, and measurement scales affect individual-variable and multivariate plots?\
-   **图表解读。** 偏度、极端观测值、变量变换和测量尺度会怎样影响单变量及多变量图表的解读？
+**再看血液运氧和血糖。** 血红蛋白是红细胞中携带氧气的蛋白，肾脏参与调节红细胞生成。在肌酐与血红蛋白均有测量的 198 人中，比较肌酐相差一倍的患者，肌酐较高一方的平均血红蛋白低 0.90 个原始记录单位。长期高血糖可能损伤肾脏，所以我们还看血糖。病史说的是过去是否被诊断，这次抽血测的是当时的水平。在有实测血糖的人中，无糖尿病史者有 **11/87** 达到 200 mg/dL，有糖尿病史者为 **61/125**。[血红蛋白分析](docs/reanalysis/clinical_tables/anemia_association.csv) · [血糖结果](docs/reanalysis/clinical_tables/glucose_threshold.csv)
+
+### How often do findings overlap? / 这些发现有多常出现在同一个人身上？
+
+Across all grades, **70 of 175 (40.0%)** patients with all three fields had at least two findings (urine albumin grade ≥1, recorded anemia, random glucose ≥200 mg/dL). The other 75 CKD records were missing at least one field. Existing observations confirm that at least **79/250** had two or more findings. If every missing finding were present, the maximum would be **122/250**. This puts the full-sample proportion between **31.6% and 48.8%**. These cross-sectional records show which findings occur in the same person. Determining their sequence or cause would require further evidence.
+
+三项发现分别指尿白蛋白等级 ≥1、病历记录有贫血、随机血糖 ≥200 mg/dL。175 人的三项资料齐全，其中 **70 人（40.0%）**至少有两项。其余 75 人有资料缺失。对全部 250 人，凭现有记录至少能确认 79 人，若把缺失项均算作阳性，最多可能有 122 人，即 **31.6%–48.8%**。这些病历能说明哪些发现出现在同一个人身上，疾病发展的先后顺序则需要随访来判断。[全组人数和缺失界限](docs/reanalysis/clinical_tables/overlap_summary.csv)
+
+### Back to record 43 / 回到第 43 号病历
+
+In record 43, serum creatinine was **1.0 mg/dL**, hemoglobin was **9.7** in the source units, anemia was explicitly recorded, and random glucose was **204 mg/dL**. Among the 45 grade-0 records with known anemia status and glucose, 12 had high glucose alone, two had anemia alone and **two had both, including record 43**. The glucose reading qualifies as high for this study. Confirming a new diabetes diagnosis would require clinical information beyond this record.
+
+这份病历的血肌酐是 **1.0 mg/dL**，血红蛋白是 **9.7**（沿用源数据单位），贫血一栏标注**有**，随机血糖为 **204 mg/dL**。在尿白蛋白 0 级、贫血和血糖资料都齐全的 45 人中，12 人只有高血糖，2 人只有贫血，**另有 2 人两者都有，第 43 号正是其中之一**。这次读数满足研究的高血糖标准，确诊糖尿病还需要其他临床证据。[同一患者的组合计数](docs/reanalysis/clinical_tables/overlap_patterns.csv)
+
+![One mark per grade-0 patient. A ring identifies record 43 among two diamonds denoting both recorded anemia and high glucose. 每个符号代表一人，圆环标出第 43 号。](docs/reanalysis/clinical_figures/patient_overlap.svg)
+
+## Analysis files / 分析资料
+
+- Clinical findings / 临床分析：[中文分析报告](docs/reanalysis/index.html) · [Result tables](docs/reanalysis/clinical_tables/) · [Figures](docs/reanalysis/clinical_figures/)
+- Missing-data supplement / 缺失数据附录：[Methods and sensitivity analysis](docs/reanalysis/missing_data.html) · [Tables](docs/reanalysis/tables/) · [Figures](docs/reanalysis/figures/)
+- Earlier exploratory work / 前期探索：[Clinical strata](docs/clinical_report.html) · [Cohort comparisons](docs/results/figures/cohort.html) · [Scale and PCA](docs/results/figures/scales.html) · [Processing audit](docs/results/preprocessing_audit.json)
+- Original proposal / 原始提案：[Bilingual text](docs/proposal.md) · [PDF](docs/DSC5002_CKD_Proposal.pdf)
+
+### Reproduce the statistical reanalysis
+
+From the repository root, use the locked project environment and the [original UCI CSV](https://archive.ics.uci.edu/static/public/336/data.csv) at `data/raw/ckd.csv`. To rerun the four clinical questions and their figures:
+
+```sh
+uv run --locked python scripts/clinical_questions.py
+uv run --locked python scripts/clinical_question_figures.py
+```
+
+The following commands reproduce the 400-record methods supplement. Its default random seed is `20261115`. Bootstrap intervals use 5,000 patient resamples within diagnosis. The validation splits the patients into five folds.
+
+临床主分析的原始数据校验值、软件版本和病例计数规则见[临床运行记录](docs/reanalysis/clinical_tables/clinical_metadata.csv)。下列命令在仓库根目录复现 400 人的方法学附录。附录另有[运行记录](docs/reanalysis/tables/analysis_metadata.csv)和[五折填补结果](docs/reanalysis/tables/imputation_folds.csv)。
+
+```sh
+uv run --locked python scripts/statistical_reanalysis.py
+uv run --locked python scripts/reanalysis_diagnostics.py
+uv run --locked python scripts/missing_data_sensitivity.py
+uv run --locked python scripts/reanalysis_figures.py
+```
 
 ## Dataset / 数据集
 
@@ -43,7 +74,7 @@ We use the public [Chronic Kidney Disease dataset from the UCI Machine Learning 
 | --- | --- |
 | Size / 规模 | 400 patient records; 24 explanatory variables and one class label / 400 条患者记录，24 个解释变量和 1 个类别标签 |
 | Groups / 分组 | 250 CKD and 150 non-CKD records / CKD 组 250 条，非 CKD 组 150 条 |
-| Main measurements / 主要指标 | Hemoglobin (`hemo`), serum creatinine (`sc`), blood urea (`bu`), blood glucose (`bgr`), and blood pressure (`bp`) / 血红蛋白、血清肌酐、血尿素、血糖和血压 |
+| Clinical fields / 主分析字段 | Urine albumin grade (`al`), serum creatinine (`sc`), hemoglobin (`hemo`), recorded anemia (`ane`), random blood glucose (`bgr`), diabetes history (`dm`) / 尿白蛋白等级、血肌酐、血红蛋白、贫血记录、随机血糖、糖尿病史 |
 | Data-quality issues / 数据质量问题 | Missing entries, inconsistent whitespace, coded categories, and different measurement scales / 缺失项、空白字符不一致、类别编码和测量尺度差异 |
 | Data license / 数据许可 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), as stated by UCI / 依 UCI 页面标注，采用 CC BY 4.0 许可 |
 
@@ -51,7 +82,10 @@ The full run confirmed the preliminary counts in the proposal. Requiring all 24 
 
 全量运行复核了提案中的样本数。要求全部 24 项特征齐全后，保留 **158 条记录（CKD 43 条，非 CKD 115 条）**，CKD 样本占比从 **62.5% 降至 27.2%**。这些比例的分母是本研究样本。[患者去留与缺失矩阵](docs/clinical_report.html#selection)
 
-## Planned analysis / 分析计划
+## Methods supplement / 方法学附录
+
+<details>
+<summary>Earlier 400-record analysis of sample selection, missing values and scale / 展开 400 人样本的缺失值与尺度分析</summary>
 
 ### Three data views / 三种数据视角
 
@@ -120,8 +154,7 @@ Extreme observations will be inspected, with removal requiring a documented data
 
 极端观测值需要逐项核查，删除时应记录具体的数据质量依据。对固定的一组观测值，常规 z 分数标准化不会改变 Pearson 相关系数。最终结论将限于本数据集中的变量关联和数据处理效应。
 
-**Planned deliverables:** a data-quality summary, a record of preprocessing decisions, matched visual comparisons, and a course report connecting findings to the research questions.\
-**计划产出：** 数据质量摘要、预处理决策记录、可逐项对照的图表，以及围绕研究问题组织的课程报告。
+</details>
 
 ## Repository layout / 仓库结构
 
@@ -129,8 +162,14 @@ Extreme observations will be inspected, with removal requiring a documented data
 RenalLens/
 ├── docs/
 │   ├── proposal.md
-│   └── DSC5002_CKD_Proposal.pdf
+│   ├── DSC5002_CKD_Proposal.pdf
+│   ├── report/               # LaTeX report and PDF / 报告
+│   ├── poster/               # LaTeX poster and PDF / 海报
+│   ├── presentation/         # Offline deck, PDF and speaking notes / 演示与讲稿
+│   └── reanalysis/           # Clinical tables, figures and methods supplement / 主分析与附录
 ├── scripts/
+│   ├── clinical_questions.py  # Measured pairs, overlap and missing-data bounds / 临床结果和缺失界限
+│   ├── clinical_question_figures.py  # Charts from the clinical tables / 临床结果图
 │   ├── data_preprocess.py     # Clean and audit the three views / 清洗、核查并构建三种视角
 │   ├── pipeline.sh            # Run the stages in order / 顺序执行各阶段
 │   ├── setup.ps1              # Windows environment setup / Windows 环境配置
@@ -352,12 +391,12 @@ If Python or uv itself is upgraded, update the corresponding version pins and qu
 
 | Member / 成员 | Student ID / 学号 |
 | --- | --- |
-| Bai Yingdong | 60209862 |
-| Zhai Junsong | 57855191 |
-| Zhang Junjie | 60754700 |
-| Chen Canyang | 60775208 |
-| Peng Peiyan | 60481323 |
-| Li Jiaheng | 60217585 |
+| BAI Yingdong | 60209862 |
+| CHEN Canyang | 60775208 |
+| LI Jiaheng | 60217585 |
+| PENG Peiyan | 60481323 |
+| ZHAI Junsong | 57855191 |
+| ZHANG Junjie | 60754700 |
 
 ## License and citation / 许可与引用
 

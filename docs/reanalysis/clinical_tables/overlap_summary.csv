@@ -1,0 +1,2 @@
+n_ckd,n_complete_signals,n_missing_any,n_missing_grade,n_missing_anemia,n_missing_glucose,n_at_least_two_complete,n_no_albumin_other_complete,n_grade0_complete,n_definite_at_least_two,n_possible_at_least_two
+250,175,75,41,0,38,70,16,45,79,122

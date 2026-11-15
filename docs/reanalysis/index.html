@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从肾脏指标到贫血与高血糖｜RenalLens</title>
+<link rel="stylesheet" href="report.css">
+</head><body><main>
+<header>
+<div class="by">RenalLens · DSC5002 · C61 第 65 组 · 2026 年 11 月 15 日</div>
+<h1>从肾脏指标到贫血与高血糖</h1>
+<p class="lead">第 43 号慢性肾病（CKD）病历中，尿白蛋白是最低的 0 级，病史明确记录无糖尿病。血检还能告诉我们什么？在 UCI 标记为 CKD 的 250 份记录中，我们先看肾脏如何保留蛋白和清除废物，再看血液运氧与血糖，最后回到这位患者。</p>
+<nav aria-label="研究问题"><a href="#kidney">白蛋白与肌酐</a><a href="#hemoglobin">血红蛋白</a><a href="#glucose">高血糖</a><a href="#overlap">同一患者</a><a href="#methods">数据与方法</a></nav>
+</header>
+<section id="kidney">
+<h2>一、白蛋白等级低的 CKD 患者，血肌酐也一定低吗？</h2>
+<p>临床评估 CKD 时，尿白蛋白和肾小球滤过率提供两方面的信息。UCI 记录中的 <code>al</code> 提供 0–5 的白蛋白等级，<code>sc</code> 提供血肌酐。我们比较同一条记录的两个指标。数据字典未提供尿白蛋白/肌酐比（UACR）或分级对应的具体浓度，因此保留 UCI 原等级；肾功能分期还需要适当的 eGFR 等资料。<a href="https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf">KDIGO CKD 评估指南</a></p>
+<p><strong>组间有趋势，同一级内的肌酐差异仍然很大。</strong>197 人有配对实测值。0–4 级的肌酐中位数依次为 1.30、1.80、2.50、2.70 和 4.05 mg/dL。0 级 47 人的中间一半在 1.00–2.20 mg/dL，实际范围为 0.6–24.0 mg/dL。4 级 24 人的实际范围为 0.5–16.4 mg/dL，两组有明显重叠。</p>
+<p>全部 197 人的 Spearman 秩相关为 <strong>0.335</strong>（患者 bootstrap 95% CI [0.193, 0.471]）。5 级只有 1 人，其肌酐为 13.0 mg/dL；排除此人后，相关系数为 0.326。另有 41 人缺白蛋白等级，这 41 人均有肌酐读数，中位数为 3.40 mg/dL。</p>
+<figure><img src="clinical_figures/albumin_creatinine.svg" alt="六条分布带保留197个配对实测值。0级有47人，肌酐范围0.6至24.0 mg/dL；圆环标出第43号的1.0 mg/dL。">
+<figcaption>图 1　每一行代表一个尿白蛋白等级，圆点是肌酐实测值，短竖线是中位数。同一等级内相同读数的圆点上下错开。<a href="clinical_figures/albumin_creatinine.png">下载 PNG</a> · <a href="clinical_figures/albumin_creatinine.svg">SVG</a> · <a href="clinical_tables/albumin_grades.csv">逐级统计</a> · <a href="clinical_tables/albumin_association.csv">相关与区间</a></figcaption></figure>
+</section>
+<section id="hemoglobin">
+<h2>二、肌酐较高的患者，血红蛋白通常低多少？</h2>
+<p>贫血是 CKD 常见的并发症。上一个问题显示，患者之间的肌酐差异很大。这里用 198 名同时测得血肌酐和血红蛋白的患者，估计两位肌酐相差一倍的患者在平均血红蛋白上相差多少。<a href="https://www.niddk.nih.gov/health-information/kidney-disease/anemia">NIDDK 对 CKD 与贫血的说明</a></p>
+<p><strong>血肌酐为另一位患者的两倍时，拟合的平均血红蛋白低 0.90 个原始记录单位</strong>（95% CI [0.62, 1.18] 个单位）。Spearman <i>ρ</i> = −0.515 [−0.614, −0.396]。UCI 将血红蛋白单位记为 <code>gms</code>，未注明体积分母，全文沿用原值。</p>
+<p>扣除肌酐最高的那条记录后，估计差为 −0.98 [−1.23, −0.72]。在年龄、肌酐和血红蛋白都有记录的同一批 192 人中，未调整的差为 −0.87，加入年龄后为 −0.89 [−1.18, −0.60]。肌酐超过 16 mg/dL 的配对只有 5 条，高端趋势的证据有限。这是不同患者之间的横断面比较；数据无法追踪一位患者随时间的血红蛋白变化或确定贫血病因。</p>
+<figure><img src="clinical_figures/creatinine_hemoglobin.svg" alt="198个配对读数及平均趋势。肌酐每相差一倍，拟合平均血红蛋白相差负0.90个原始单位。极高肌酐段患者稀少。">
+<figcaption>图 2　圆环标出第 43 号病历。右侧用肌酐 2 和 4 mg/dL 举例说明横轴上的一次翻倍，两端是模型给出的平均血红蛋白估计。左图阴影表示拟合均值的 95% 置信区间。<a href="clinical_figures/creatinine_hemoglobin.png">下载 PNG</a> · <a href="clinical_figures/creatinine_hemoglobin.svg">SVG</a> · <a href="clinical_tables/anemia_association.csv">斜率与敏感性结果</a> · <a href="clinical_tables/anemia_age_sensitivity.csv">年龄调整</a></figcaption></figure>
+</section>
+<section id="glucose">
+<h2>三、病史明确记录无糖尿病时，还有多少患者出现明显高血糖？</h2>
+<p>前两项检查反映肾脏和血液方面的表现。临床记录还提供糖尿病病史和随机血糖，可以直接查看二者是否一致。250 人的糖尿病病史均明确记为“有”或“无”。我们把随机血糖 ≥200 mg/dL 记为达到阈值的一次读数。</p>
+<div class="table-wrap"><table>
+<caption>分母为各病史组中实际测得随机血糖的人数。</caption>
+<thead><tr><th scope="col">糖尿病病史</th><th scope="col">总人数</th><th scope="col">未测</th><th scope="col">达到阈值 / 已测</th><th scope="col">比例（Wilson 95% CI）</th></tr></thead>
+<tbody><tr><th scope="row">记录为无</th><td>113</td><td>26</td><td>11 / 87</td><td>12.6%（7.2%–21.2%）</td></tr>
+<tr><th scope="row">记录为有</th><td>137</td><td>12</td><td>61 / 125</td><td>48.8%（40.2%–57.5%）</td></tr></tbody></table></div>
+<p>病史记录为无的 113 人中，<strong>至少有 11 人</strong>出现这一读数。若该组 26 名缺测者全部低于或全部达到阈值，113 人中的比例界限分别为 9.7% 和 32.7%。一次随机血糖 ≥200 mg/dL 的诊断意义取决于典型症状、高血糖危象或确认性检测等信息；本数据缺少这些资料，无法据此统计新增糖尿病病例。<a href="https://diabetesjournals.org/care/article/49/Supplement_1/S27/163926">ADA 2026 糖尿病诊断标准</a></p>
+<figure><img src="clinical_figures/hyperglycemia.svg" alt="无糖尿病病史记录组的已测者中有11/87达到200 mg/dL，有糖尿病病史组为61/125，另分别缺测26人和12人。">
+<figcaption>图 3　每个短线标出一次实测血糖，右侧阴影从本研究界值 200 mg/dL 开始。第 43 号病历的 204 mg/dL 位于界值右侧。两组的比例均以本组有血糖读数的人为分母。<a href="clinical_figures/hyperglycemia.png">下载 PNG</a> · <a href="clinical_figures/hyperglycemia.svg">SVG</a> · <a href="clinical_tables/glucose_threshold.csv">分组计数与缺测界限</a></figcaption></figure>
+</section>
+<section id="overlap">
+<h2>四、把检查放回同一位患者身上，哪些线索会共同出现？</h2>
+<p>前三问的实测人群并不完全相同。要知道多少人兼有几种表现，必须逐条对齐患者记录。这一步使用三个可以从原始记录直接判定的标记：白蛋白原分级 ≥1、病历明确记录贫血、以及随机血糖 ≥200 mg/dL。贫血以病历的 <code>ane</code> 字段为准；白蛋白 ≥1 表示原分级有读数高于 0，不对应 KDIGO 的 A 分期。</p>
+<p><strong>三项均有记录的 175 人中，70 人（40.0%）兼有至少两项，11 人三项都有。</strong>29 人三项均无，76 人恰有一项，59 人恰有两项。白蛋白为 0 级且三项均可判断的 45 人中，16 人（35.6%）仍有其他线索：12 人仅血糖达到阈值，2 人仅记录贫血，另 2 人两者都有。这解释了为什么从第一张图的“白蛋白 0 级”无法推断患者的其余检查。</p>
+<p>在全部 250 人中，75 人有至少一项缺失。利用每个人已经知道的结果，即使将未知项全部按阴性处理，也已有 <strong>79 人</strong>达到两项；若未知项全部按阳性处理，最多 <strong>122 人</strong>。因此全组可由数据确定的范围是 <strong>31.6%–48.8%</strong>。这是缺失记录容许的上下限，和抽样置信区间含义不同。</p>
+<figure><img src="clinical_figures/patient_overlap.svg" alt="45名尿白蛋白0级患者一人一格，29人无贫血或高血糖，12人仅高血糖，2人仅有贫血，2人两项都有。圆环标出两者皆有的第43号。">
+<figcaption>图 4　回到第 43 号病历。45 人中，两个菱形代表同时记录贫血和高血糖的两人。带环的菱形就是病例 43：病历写有贫血，随机血糖为 204 mg/dL。<a href="clinical_figures/patient_overlap.png">下载 PNG</a> · <a href="clinical_figures/patient_overlap.svg">SVG</a> · <a href="clinical_tables/overlap_patterns.csv">八种组合计数</a> · <a href="clinical_tables/overlap_summary.csv">缺失与界限</a> · <a href="clinical_tables/patient_measurements.csv">逐条记录</a></figcaption></figure>
+</section>
+<section id="methods">
+<h2>研究范围与复核</h2>
+<p>UCI CKD 数据集共 400 条记录。本分析纳入全部 250 条标记为 CKD 的记录，采用横断面设计，每行作为一名患者的记录处理。数据没有可核对不同就诊是否属于同一人的持续身份标识。主分析按每题所需字段选取实测值；若一律要求 24 个解释变量齐全，CKD 患者只剩 43 人。本项目把缺失、异常读数和完整病例分析用作敏感性检查。<a href="clinical_tables/availability.csv">各题可用人数</a> · <a href="missing_data.html">400 人缺失值与尺度分析附录</a></p>
+<ul>
+<li>白蛋白为有序等级，使用平均秩 Spearman 相关，按患者重抽 5,000 次取 95% 百分位区间。5 级单例另作敏感性检查。</li>
+<li>血红蛋白对 log₂（肌酐）拟合直线，斜率直接给出肌酐每翻倍的平均差。报告 HC3 异方差稳健标准误和 <i>t</i> 区间。主模型 <i>t</i>(196) = −6.32，<i>p</i> &lt; .001，<i>R</i>² = 0.261。年龄调整和暂时排除最高肌酐值用于检查结果稳定性。<a href="clinical_tables/anemia_diagnostics.csv">模型诊断</a></li>
+<li>随机血糖的实测比例使用 Wilson 区间。把 24 字段完整的患者单独分析时，记录无糖尿病组为 3/15，记录有糖尿病组为 17/28。对计数较少或缺测较多的组，保留分子、分母及不确定性。</li>
+<li>这些问题是在原课程分析后形成的探索性问题。所有区间均为逐项 95% 区间。病因、治疗效果、随访进展和一般 CKD 人群患病率均超出这批记录可回答的范围。<a href="clinical_tables/clinical_metadata.csv">版本、种子及原始数据校验值</a> · <a href="../../README.md">复跑命令</a></li>
+</ul>
+</section>
+<footer>
+<p>数据来自 Rubini、Soundarapandian 与 Eswaran（2015），许可 CC BY 4.0。临床背景分别参照上文所引 KDIGO、NIDDK 和 ADA 资料。<a href="https://doi.org/10.24432/C5G020">UCI 数据与字典</a></p>
+<p>统计与制图工作流参考 Kassis, T., Agarwal, V., He, Y., Patel, D., &amp; Brueckner, A. M. (2026). <i>Scientific Agent Skills: A Library of Procedural Knowledge for Research Agents</i>. <a href="https://doi.org/10.48550/arXiv.2609.00065">arXiv:2609.00065</a></p>
+</footer></main></body></html>

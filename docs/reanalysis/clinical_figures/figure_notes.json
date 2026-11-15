@@ -1,0 +1,53 @@
+{
+  "albumin_creatinine": {
+    "title": "One urine grade, a wide range of creatinine",
+    "alt": "Six horizontal strips show measured creatinine. The grade-0 strip spans 0.6–24 mg/dL, including record 43 at 1.0.",
+    "caption": "Only identical readings are offset vertically. The grade labels show the number of patients and the scale doubles at each tick.",
+    "sources": [
+      "../clinical_tables/patient_measurements.csv",
+      "../clinical_tables/albumin_grades.csv",
+      "../clinical_tables/albumin_association.csv"
+    ],
+    "width_mm": 274.32,
+    "height_mm": 148.59,
+    "dpi": 360
+  },
+  "creatinine_hemoglobin": {
+    "title": "How much lower was hemoglobin at twice the creatinine?",
+    "alt": "The fitted hemoglobin is 0.90 source units lower at twice the creatinine; the right-hand graphic compares predictions at 2 and 4 mg/dL.",
+    "caption": "All original measured pairs are shown, including the highest creatinine value. The line joining predicted means is a model contrast across patients.",
+    "sources": [
+      "../clinical_tables/patient_measurements.csv",
+      "../clinical_tables/anemia_fit.csv",
+      "../clinical_tables/anemia_association.csv"
+    ],
+    "width_mm": 274.32,
+    "height_mm": 148.59,
+    "dpi": 360
+  },
+  "hyperglycemia": {
+    "title": "What did the blood test add to the diabetes history?",
+    "alt": "Two strips show measured glucose. Record 43 is just above 200 mg/dL in the no-history group; 11/87 in that group and 61/125 with diabetes history reached 200.",
+    "caption": "Measurements are positioned on the same linear scale. Vertical offsets separate neighboring marks. Shading denotes the study threshold, not a new diagnosis. Whole-group missing-data bounds are in the linked table.",
+    "sources": [
+      "../clinical_tables/patient_measurements.csv",
+      "../clinical_tables/glucose_threshold.csv"
+    ],
+    "width_mm": 274.32,
+    "height_mm": 148.59,
+    "dpi": 360
+  },
+  "patient_overlap": {
+    "title": "What else was found at urine albumin grade 0?",
+    "alt": "A matrix of 45 grade-zero records shows 29 with neither finding, 12 with high glucose alone, two with anemia alone and two with both. A ring marks record 43.",
+    "caption": "Each position corresponds to a source row, ordered by anemia, high glucose and then source row. Shapes and fills identify categories. The ring around a diamond indicates record 43.",
+    "sources": [
+      "../clinical_tables/patient_measurements.csv",
+      "../clinical_tables/overlap_patterns.csv",
+      "../clinical_tables/overlap_summary.csv"
+    ],
+    "width_mm": 274.32,
+    "height_mm": 148.59,
+    "dpi": 360
+  }
+}

@@ -1,0 +1,6 @@
+feature,unit,view,observed_n,paired_n,status,raw_skewness,ln_skewness
+hemo,g (UCI),observed,348,0,no_positive_skew,-0.3350946791593011,
+sc,mg/dL,observed,383,383,compared,7.509538252140631,1.0260778886169275
+bu,mg/dL,observed,381,381,compared,2.6343744585903863,0.26231397371673665
+bgr,mg/dL,observed,356,356,compared,2.0107731725149565,0.7799417290161537
+bp,mmHg,observed,388,388,compared,1.6054289569770575,0.44182752257261765

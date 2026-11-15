@@ -1,0 +1,7 @@
+view,question,x,y,n_cohort,n_both_measured,n_x_missing_only,n_y_missing_only,n_both_missing
+observed,albumin_creatinine,al,sc,250,197,41,12,0
+observed,creatinine_hemoglobin,sc,hemo,250,198,6,40,6
+observed,diabetes_glucose,dm,bgr,250,212,0,38,0
+complete_case,albumin_creatinine,al,sc,43,43,0,0,0
+complete_case,creatinine_hemoglobin,sc,hemo,43,43,0,0,0
+complete_case,diabetes_glucose,dm,bgr,43,43,0,0,0

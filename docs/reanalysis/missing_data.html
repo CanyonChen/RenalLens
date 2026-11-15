@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>哪些患者被留下？｜RenalLens 统计重分析</title>
+<link rel="stylesheet" href="report.css">
+</head>
+<body><main>
+<header>
+<div class="by">RenalLens · 缺失值与尺度敏感性附录 · <a href="index.html">返回临床主报告</a></div>
+<h1>哪些患者被留下？</h1>
+<p class="lead">在这 400 条慢性肾病研究记录中，要求所有字段齐全会优先留下非 CKD 患者。总体肌酐看起来下降了，而在留下来的 CKD 患者中，肌酐反而更高。用一个全体中位数填补时，两组的误差也朝相反方向。</p>
+<nav aria-label="报告目录"><a href="#selection">病例筛选</a><a href="#imputation">填补验证</a><a href="#sensitivity">相关性与尺度</a><a href="#methods">方法与数据</a></nav>
+</header>
+<section id="selection">
+<h2>一、总体肌酐为何在删行后下降？</h2>
+<p>完整病例要求 24 个解释变量全部有记录。CKD 患者仅留下 43/250 人（17.2%），非 CKD 患者留下 115/150 人（76.7%）。两组保留率之差为 <strong>−59.5 个百分点</strong>，95% CI [−66.8, −50.5]，双侧 Fisher 精确检验 <i>p</i> &lt; .001。400 人里有 62.5% 属于 CKD，留下的 158 人里只有 27.2%。缺失最多的字段是红细胞评估（152/400），其次是红细胞计数（131/400）和白细胞计数（106/400）。</p>
+<p>要分清两种变化，可以做一个重新加权的比较。383 人有肌酐实测值，其中 238 人（62.1%）属于 CKD。保留 158 个完整病例及其每一个原始读数，只调整它们的权重，使 CKD 在合并分布中重新占 62.1%，再求中位数。</p>
+<div class="table-wrap"><table>
+<caption>肌酐中位数（mg/dL），按同一条比较路径排列</caption>
+<thead><tr><th scope="col">使用的读数与构成</th><th scope="col">患者数</th><th scope="col">CKD 权重占比</th><th scope="col">中位数</th></tr></thead>
+<tbody><tr><th scope="row">所有有肌酐实测值的患者</th><td>383</td><td>62.1%</td><td>1.30</td></tr>
+<tr><th scope="row">完整病例，恢复实测人群的组别比例</th><td>158</td><td>62.1%</td><td>2.20</td></tr>
+<tr><th scope="row">完整病例，按实际人数</th><td>158</td><td>27.2%</td><td>1.10</td></tr></tbody></table></div>
+<p>沿这条路径，在相同组别比例下换用完整病例的读数，中位数上升 <strong>0.90</strong> mg/dL（95% CI [0.30, 1.90]）。再换成完整病例的实际比例，中位数下降 <strong>1.10</strong> mg/dL（95% CI [−2.10, −0.60]）。两步合计 −0.20 mg/dL。CKD 组内，中位数从 2.25 升至 4.10；非 CKD 组内均为 0.90。这是对本样本的描述性分解，分组权重只能校正诊断比例；未记录的肌酐仍然未知。</p>
+<figure><img src="figures/retention.svg" alt="CKD 的完整病例保留率为 17.2%，非 CKD 为 76.7%。删行后总体肌酐中位数降低，CKD 组内升高。">
+<figcaption>图 1　两组保留率的区间采用 Wilson 法。肌酐变化为完整病例中位数减去同组所有实测读数的中位数。<a href="figures/retention.png">下载 PNG</a> · <a href="figures/retention.svg">SVG</a></figcaption></figure>
+<div class="links"><a href="tables/retention_contrast.csv">保留率检验</a><a href="tables/median_shifts.csv">五指标的分组变化及区间</a><a href="tables/mixture_standardization.csv">逐指标重新加权结果</a><a href="tables/missingness.csv">24 字段的总体及分组缺失率</a></div>
+</section>
+<section id="imputation">
+<h2>二、同一个填补值，会怎样错估两个组？</h2>
+<p>血红蛋白的 348 个实测值中，没有人恰好等于全体中位数 12.65；补齐的 52 项全部落在这一点，形成占 400 人 <strong>13.0%</strong> 的台阶。三种数据处理方式的分布可直接对照。</p>
+<figure><img src="figures/distributions.svg" alt="五项指标在实测、完整病例和填补三种视角下的累积分布。血红蛋白的填补曲线在 12.65 处跳升。">
+<figcaption>图 2　每条经验累积分布线使用该视角下的有效读数作分母，曲线台阶越高，落在该值的人越多。<a href="figures/distributions.png">下载 PNG</a> · <a href="figures/distributions.svg">SVG</a></figcaption></figure>
+<p>为了量化填补误差，把 400 人按诊断分成五折。每次用四折患者的实测值求一个全体中位数，用它预测留出一折的已知读数；每名患者只进入一次验证集。诊断用于平衡各折构成，填补值的估算不使用诊断。下表的有符号误差为<strong>填补值减去实测值</strong>；正值代表填高，负值代表填低。</p>
+<div class="table-wrap"><table>
+<caption>五折留出验证，误差按指标原单位报告</caption>
+<thead><tr><th scope="col">指标</th><th scope="col">CKD / 非 CKD 实测数</th><th scope="col">CKD 中位误差</th><th scope="col">非 CKD 中位误差</th><th scope="col">平均绝对误差<br>CKD / 非 CKD</th></tr></thead>
+<tbody>
+<tr><th scope="row">血红蛋白（UCI 记为 gms）</th><td>204 / 144</td><td>+1.80</td><td>−2.40</td><td>2.37 / 2.53</td></tr>
+<tr><th scope="row">肌酐（mg/dL）</th><td>238 / 145</td><td>−1.00</td><td>+0.40</td><td>3.27 / 0.40</td></tr>
+<tr><th scope="row">血尿素（mg/dL）</th><td>237 / 144</td><td>−12.00</td><td>+8.50</td><td>41.46 / 11.87</td></tr>
+<tr><th scope="row">随机血糖（mg/dL）</th><td>212 / 144</td><td>−22.00</td><td>+13.75</td><td>71.21 / 18.59</td></tr>
+<tr><th scope="row">血压（mmHg）</th><td>240 / 148</td><td>0.00</td><td>+10.00</td><td>12.12 / 8.78</td></tr>
+</tbody></table></div>
+<p>把两组合在一起，肌酐的有符号误差中位数恰好为 0，平均绝对误差仍有 2.18 mg/dL。CKD 组有肌酐实测值的患者中，填补普遍偏低；非 CKD 组偏高。验证衡量这些已测患者在这次划分下的误差。真正缺失的 17 个肌酐读数没有可供核对的真值，缺失原因也可能与随机遮盖不同。</p>
+<figure><img src="figures/imputation_validation.svg" alt="五项指标的分组填补误差。血红蛋白在 CKD 组填高、非 CKD 组填低；肌酐、血尿素和随机血糖的方向相反。">
+<figcaption>图 3　跨指标比较时，每条验证误差除以对应训练折的四分位距，再取组内中位数。原单位的平均绝对误差保留了正负误差抵消时看不到的误差幅度。<a href="figures/imputation_validation.png">下载 PNG</a> · <a href="figures/imputation_validation.svg">SVG</a></figcaption></figure>
+<div class="links"><a href="tables/imputation_validation.csv">验证结果与样本量</a><a href="tables/imputation_folds.csv">每折的训练中位数与四分位距</a><a href="tables/distribution_summary.csv">三种视角的分布统计</a><a href="tables/measurement_values.csv">逐患者绘图数据</a></div>
+</section>
+<section id="sensitivity">
+<h2>三、哪些肾指标关系经得起敏感性检查？</h2>
+<p>肌酐和血尿素同时有实测值的有 380 人。Pearson 衡量原单位下的线性关系，Spearman 衡量两个指标排序的一致程度。筛到 158 个完整病例后，这两项结果朝不同方向变化。</p>
+<div class="table-wrap"><table>
+<caption>总体肌酐与血尿素。变化列为完整病例减去实测配对，括号内为配对重抽样的 95% CI。</caption>
+<thead><tr><th scope="col">系数</th><th scope="col">实测配对（380）</th><th scope="col">完整病例（158）</th><th scope="col">单次填补（400）</th><th scope="col">变化及区间</th></tr></thead>
+<tbody><tr><th scope="row">Pearson <i>r</i></th><td>0.586</td><td>0.896</td><td>0.582</td><td>+0.310 [0.033, 0.451]</td></tr>
+<tr><th scope="row">Spearman <i>ρ</i></th><td>0.703</td><td>0.478</td><td>0.696</td><td>−0.225 [−0.356, −0.113]</td></tr></tbody></table></div>
+<p>CKD 组的 236 个实测配对中，Spearman <i>ρ</i> = 0.840 [0.771, 0.892]；非 CKD 组的 144 对中，<i>ρ</i> = −0.096 [−0.273, 0.077]，该组的肌酐实测范围仅为 0.6–1.2 mg/dL。分别在组内比较实测与完整病例时，秩相关的变化为 +0.018 和 −0.010，各自区间都跨过零。总体的 −0.225 掩盖了这种分组差异。</p>
+<p>将 380 个配对逐一暂时拿掉并重算，影响 Pearson 最大的是源数据第 22 条记录（肌酐 76、血尿素 180 mg/dL）。暂时去掉它后，<i>r</i> 从 0.586 升到 0.674，<i>ρ</i> 从 0.703 变为 0.701。主结果保留了这条记录。肌酐实测分布的偏度为 7.51，对同样的 383 个值取自然对数后为 1.03。</p>
+<figure><img src="figures/renal_association.svg" alt="肌酐与血尿素的全部实测配对和相关估计。总体实测 Pearson 为 0.586，Spearman 为 0.703；完整病例分别为 0.896 和 0.478。">
+<figcaption>图 4　散点的两轴以 10 为底取对数，以原单位标刻度，相同读数可重叠。Pearson 和 Spearman 系数都按原始读数计算，比较两种处理规则时在同一批重抽患者上计算差值。<a href="figures/renal_association.png">下载 PNG</a> · <a href="figures/renal_association.svg">SVG</a></figcaption></figure>
+<h3>把量纲换掉，第一主成分也会改变</h3>
+<p>固定同一批 400 人、同一套中位数填补值和五个指标，只改变进入主成分分析（PCA）的尺度。原单位下，第一主成分（PC1）解释 68.8% 的方差，随机血糖的方向系数为 +0.990。各指标分别减均值、除以标准差后，PC1 解释 43.3%，其绝对系数最大的三项为血尿素（+0.566）、血红蛋白（−0.534）和肌酐（+0.491）。方向整体翻转与原解等价；系数说明变量如何共同变化，不能当作疾病风险权重。</p>
+<figure><img src="figures/pca.svg" alt="同一批 400 人经同样填补，在原单位下随机血糖主导第一主成分，标准化后血尿素、血红蛋白和肌酐有较大的方向系数。">
+<figcaption>图 5　两次拟合只改变尺度。解释方差比例和各指标的有符号方向系数分开显示。<a href="figures/pca.png">下载 PNG</a> · <a href="figures/pca.svg">SVG</a></figcaption></figure>
+<div class="links"><a href="tables/renal_correlations.csv">分组系数与区间</a><a href="tables/renal_correlation_shifts.csv">相关变化</a><a href="tables/diagnostics_renal_influence.csv">380 次留一结果</a><a href="tables/pairwise_correlations.csv">五指标全部配对</a><a href="tables/pca_variance.csv">PCA 方差</a><a href="tables/pca_loadings.csv">PCA 系数</a></div>
+</section>
+<section id="methods">
+<h2>数据、方法与复核</h2>
+<p>这是一项已有探索结果基础上的再分析。研究对象是 UCI CKD 的全部 400 条患者记录，按每行一名患者计算。诊断标签仅用于分组。数值缺失按全体实测中位数、类别缺失按众数填补；留出验证则逐折重新求中位数。原始观测视角对每个指标或指标对使用当时可用的记录。本次从原始 CSV 重跑的 15 张原版结果表与仓库发布版本数值一致。</p>
+<p>保留率按组给 Wilson 区间，两组差值给 Newcombe 区间；保留与诊断的关联使用一次双侧 Fisher 精确检验（样本优势比 0.063，<i>p</i> = 6.65 × 10<sup>−33</sup>）。中位数、相关系数及其差值使用 5,000 次患者级分层 bootstrap，固定 CKD/非 CKD 人数，每次对同一批抽到的患者计算两个视角，以第 2.5 和 97.5 百分位为端点。重新加权的区间每次重估组别权重。区间均为逐项 95% 区间，未作同时覆盖校正。填补后的描述量与五折验证误差按观测结果报告。</p>
+<p>统计推断把患者记录视为相互独立；数据未提供可用于核对重复就诊或聚类的标识。按组检查了样本量、缺失、均值、标准差、四分位距、Tukey 围栏及偏度，并以 Shapiro–Wilk 和中位数中心 Levene 作分布诊断。右偏且全为正值的指标另看自然对数分布。所有原始观测均保留。本样本的保留差、组别构成和相关性依赖于记录方式，不能给出人群患病率、缺失机制或因果效应。</p>
+<div class="links"><a href="tables/diagnostics.csv">分布诊断</a><a href="tables/log_comparison.csv">原值及对数</a><a href="tables/extreme_observations.csv">极端观测记录</a><a href="tables/clinical_strata.csv">五项临床分层比较</a><a href="tables/analysis_metadata.csv">数据校验值、版本与随机种子</a><a href="../../README.md">复跑命令</a></div>
+</section>
+<footer>
+<p>数据来源为 Rubini、Soundarapandian 与 Eswaran（2015）的 Chronic Kidney Disease 数据集，许可 CC BY 4.0。<a href="https://doi.org/10.24432/C5G020">UCI 数据与字典</a></p>
+<p>统计与制图工作流参考 Kassis, T., Agarwal, V., He, Y., Patel, D., &amp; Brueckner, A. M. (2026). <i>Scientific Agent Skills: A Library of Procedural Knowledge for Research Agents</i>. <a href="https://doi.org/10.48550/arXiv.2609.00065">arXiv:2609.00065</a></p>
+</footer></main></body></html>

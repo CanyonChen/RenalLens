@@ -1,0 +1,10 @@
+:root{color-scheme:light;--ink:#182e30;--muted:#40595b;--line:#cfdbd7;--accent:#00635c;--paper:#fcfcf9}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.75 "Microsoft YaHei","PingFang SC",sans-serif}
+main{max-width:1010px;margin:auto;padding:42px clamp(18px,4vw,56px) 60px}header,section{border-bottom:1px solid var(--line);padding:20px 0 34px}
+h1,h2,h3{line-height:1.35;letter-spacing:-.025em}h1{font-size:clamp(32px,5vw,58px);margin:.3em 0}h2{font-size:clamp(24px,3.4vw,35px);margin:22px 0 15px}h3{font-size:21px;margin:30px 0 8px}
+p{margin:.8em 0;max-width:52em}.by,figcaption,.links,footer,small{font-size:.88rem;color:var(--muted)}.lead{font-size:1.13rem;max-width:46em}
+a{color:var(--accent);text-underline-offset:3px}nav,.links{display:flex;gap:8px 20px;flex-wrap:wrap}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:.94rem;margin:12px 0;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:9px 8px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}thead{background:#edf2ed}
+figure{margin:25px 0 18px}img{width:100%;height:auto;display:block;background:white;border:1px solid var(--line)}figcaption{margin-top:8px}
+code{font-size:.92em;overflow-wrap:anywhere}footer{padding-top:18px}ul{padding-left:1.4em}
+@media print{body{background:white;font-size:11pt}main{max-width:none;padding:0}nav{display:none}figure,table{break-inside:avoid}h2,h3{break-after:avoid}}

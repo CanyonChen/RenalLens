@@ -1,0 +1,63 @@
+{
+  "retention": {
+    "title": "Complete-case selection changes the diagnosis mix",
+    "alt": "Complete records were retained in 17.2% of CKD and 76.7% of non-CKD patients. Median creatinine changed by -0.20 mg/dL overall and +1.85 within CKD. The reweighted complete-case median was 2.20 mg/dL.",
+    "caption": "A shows complete records divided by all records in each diagnosis and Wilson 95% intervals. B compares the complete-case median with the median among patients with a creatinine measurement. Bars are pointwise 95% percentile intervals from a patient bootstrap stratified by diagnosis, using the same draws for both views. The three pooled medians examine how much the diagnosis mix alone changes the result.",
+    "sources": [
+      "../tables/retention.csv",
+      "../tables/median_shifts.csv",
+      "../tables/mixture_standardization.csv"
+    ],
+    "width_mm": 254.0,
+    "height_mm": 127.0,
+    "dpi": 360
+  },
+  "distributions": {
+    "title": "Five clinical measurements across three data views",
+    "alt": "Five empirical distribution plots compare available, complete and imputed measurements. Hemoglobin has a visible imputation step because 52 missing values receive 12.65. Creatinine and blood urea show long right tails.",
+    "caption": "Each panel plots a right-continuous empirical cumulative distribution in the three views, using all observed values in that view as its denominator. Counts follow legend order. Creatinine and blood urea use base-10 axes with native-unit labels; all values were positive and the full ranges are shown. Hemoglobin uses the UCI source unit, recorded as g.",
+    "sources": [
+      "../tables/measurement_values.csv",
+      "../tables/distribution_summary.csv"
+    ],
+    "width_mm": 254.0,
+    "height_mm": 170.18,
+    "dpi": 360
+  },
+  "renal_association": {
+    "title": "Creatinine and urea under different missing-data rules",
+    "alt": "380 paired measurements show a long upper tail, including row 22 at creatinine 76 and urea 180 mg/dL. After complete-case selection, Pearson r changes by +0.31 and Spearman rho by -0.23.",
+    "caption": "A shows every jointly observed pair with no jitter or exclusions. Axes use base-10 scales and native-unit tick labels; coincident records can overlap. B displays native-unit coefficients with pointwise bootstrap 95% intervals for observed and complete pairs. The single-imputed estimates are descriptive, with no uncertainty bars. C shows pointwise 95% percentile intervals for complete-minus-available changes, resampling patients within diagnosis and applying both rules to each bootstrap draw.",
+    "sources": [
+      "../tables/measurement_values.csv",
+      "../tables/renal_correlations.csv",
+      "../tables/renal_correlation_shifts.csv"
+    ],
+    "width_mm": 254.0,
+    "height_mm": 139.7,
+    "dpi": 360
+  },
+  "pca": {
+    "title": "Standardization changes the first principal component",
+    "alt": "PC1 explains 68.8% of variance in original units and 43.3% after standardization. Random blood glucose dominates the original-unit axis; urea, hemoglobin and creatinine have the largest absolute standardized coefficients.",
+    "caption": "A shows signed unit-length PC1 eigenvector coordinates (a whole eigenvector can be sign-flipped). B gives the fraction of within-fit variance explained by each component. Both fits center their five columns. Standardization additionally divides by the population standard deviation (ddof=0).",
+    "sources": [
+      "../tables/pca_variance.csv",
+      "../tables/pca_loadings.csv"
+    ],
+    "width_mm": 254.0,
+    "height_mm": 116.84,
+    "dpi": 360
+  },
+  "imputation_validation": {
+    "title": "How far does a median fill miss a held-out value?",
+    "alt": "Five rows contrast diagnosis-specific signed validation errors on a common training-IQR scale and mean absolute errors in original units. For creatinine, the median standardized signed error is -0.51 in CKD and +0.20 in non-CKD.",
+    "caption": "Five-fold validation masks observed entries. A uses the held-out prediction minus the measured value, divided by the training interquartile range in that fold, then takes the diagnosis-specific median. B gives mean absolute error in original units. The plotted point estimates describe measured records. Missing records have no observed target for validating their imputed value.",
+    "sources": [
+      "../tables/imputation_validation.csv"
+    ],
+    "width_mm": 254.0,
+    "height_mm": 129.54,
+    "dpi": 360
+  }
+}

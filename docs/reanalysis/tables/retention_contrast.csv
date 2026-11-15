@@ -1,0 +1,2 @@
+contrast,delta,ci_low,ci_high,ci_method,sample_odds_ratio,fisher_two_sided_p
+ckd_minus_notckd,-0.5946666666666667,-0.6681656318172524,-0.5045664024253343,Newcombe hybrid score 95%,0.06322201218231464,6.651950003079756e-33
