@@ -1,4 +1,4 @@
-# RenalLens presentation guide
+# RenalLens: Reading Beyond Urine Albumin
 
 Eight slides, seven minutes. The C61 group presentation uses the uploaded poster on the classroom computer. The deck can be used for rehearsal. [C61 presentation instructions](https://canvas.cityu.edu.hk/courses/70778/discussion_topics/644602)
 

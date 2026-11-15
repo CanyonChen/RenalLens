@@ -15,18 +15,17 @@
 % Fonts
 % ====================
 
-\IfFontExistsTF{Raleway}
-  {\newfontfamily\Raleway[Ligatures=TeX]{Raleway}}
-  {\newfontfamily\Raleway[Ligatures=TeX]{Latin Modern Sans}}
-\IfFontExistsTF{Lato}
-  {\newfontfamily\Lato[Ligatures=TeX]{Lato}}
-  {\newfontfamily\Lato[Ligatures=TeX]{Latin Modern Sans}}
+\newfontfamily\Raleway[Ligatures=TeX]{Raleway}
+\newfontfamily\Lato[Ligatures=TeX]{Lato}
 
 \usefonttheme{professionalfonts}
 
-\IfFontExistsTF{Lato}
-  {\setsansfont{Lato}}
-  {\setsansfont{Latin Modern Sans}}
+\setsansfont{Lato}[
+  UprightFont=*-Light,
+  ItalicFont=*-LightItalic,
+  BoldFont=*-Regular,
+  BoldItalicFont=*-Italic
+]
 
 \setbeamerfont{headline}{family=\Raleway}
 \setbeamerfont{headline title}{size=\Huge,series=\bfseries}

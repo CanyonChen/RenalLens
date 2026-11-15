@@ -1,129 +1,154 @@
-% RenalLens, adapted from the supplied Gemini / UChicago three-column poster.
-% Compile twice in this directory with XeLaTeX: xelatex -jobname=RenalLens_Poster main.tex
+% RenalLens, adapted from poster_template/main.tex (UChicago CS / Gemini v1.1.0).
+% In this directory: xelatex -jobname=RenalLens_Poster main.tex
+% bibtex RenalLens_Poster ; then run the same XeLaTeX command twice.
+% The supplied Gemini theme uses the Raleway and Lato font families.
 \documentclass[final]{beamer}
-\IfFileExists{beamerposter.sty}{
-  \usepackage[size=custom,width=120,height=72,scale=1.0]{beamerposter}
-}{
-  \geometry{paperwidth=120cm,paperheight=72cm}
-}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[size=custom,width=120,height=72,scale=1.0]{beamerposter}
 \usetheme{gemini}
+\usecolortheme{uchicago}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\definecolor{ink}{HTML}{292529}
-\definecolor{cityucrimson}{HTML}{D2133F}
-\definecolor{cityuburgundy}{HTML}{941344}
-\definecolor{soft}{HTML}{FAEDF1}
-\definecolor{pale}{HTML}{FCDCE6}
-\definecolor{muted}{HTML}{554E52}
-\definecolor{rulegray}{HTML}{DAC9CF}
-\setbeamercolor{normal text}{fg=ink,bg=white}
-\setbeamercolor{headline}{fg=white,bg=cityuburgundy}
-\setbeamercolor{footline}{fg=white,bg=cityuburgundy}
-\setbeamercolor{summary}{fg=ink,bg=soft}
-\setbeamersize{text margin left=2.7cm,text margin right=2.7cm}
-\setbeamertemplate{navigation symbols}{}
-\hypersetup{pdftitle={Beyond the urine test in chronic kidney disease},pdfauthor={RenalLens, DSC5002 C61 Group 65},pdfsubject={City University of Hong Kong}}
-\title{Beyond the urine test in chronic kidney disease}
-\author{BAI Yingdong, CHEN Canyang, LI Jiaheng, PENG Peiyan, ZHAI Junsong and ZHANG Junjie}
-\institute{City University of Hong Kong}
-\newcommand{\typeat}[2]{\fontsize{#1}{#2}\selectfont}
-\newcommand{\panelhead}[2]{%
-  {\typeat{28}{33}\bfseries\color{cityuburgundy}#1\par}
-  \vspace{0.24cm}
-  {\typeat{45}{51}\bfseries\color{ink}#2\par}
-  \vspace{0.30cm}
-  {\color{rulegray}\rule{\linewidth}{2pt}\par}
-  \vspace{0.45cm}}
-\newcommand{\words}[1]{{\raggedright\typeat{39}{47}#1\par}}
-\newcommand{\detail}[1]{{\raggedright\typeat{32}{38}\color{muted}#1\par}}
-\setbeamertemplate{headline}{
- \begin{beamercolorbox}[wd=\paperwidth,leftskip=2.7cm,rightskip=2.7cm]{headline}
- \par\vskip0.8cm
- \noindent\begin{minipage}[c]{97cm}
- {\typeat{30}{36}\bfseries\color{pale}RENALLENS\quad\textbar\quad DSC5002\enspace /\enspace C61 GROUP 65\par}
- \vspace{0.18cm}
- {\typeat{73}{83}\bfseries\inserttitle\par}
- \vspace{0.18cm}
- {\typeat{32}{38}\insertauthor\qquad\textbar\qquad\insertinstitute\par}
- \end{minipage}\hfill
- \begin{minipage}[c]{13.0cm}\includegraphics[width=\linewidth]{../CityUHK_Logo_2.png}\end{minipage}\par
- \vskip0.75cm
- \end{beamercolorbox}}
-\setbeamertemplate{footline}{
- \begin{beamercolorbox}[wd=\paperwidth,leftskip=2.7cm,rightskip=2.7cm]{footline}
- \par\vskip0.48cm
- {\typeat{26}{33}\href{https://doi.org/10.24432/C5G020}{UCI Chronic Kidney Disease (2015), doi:10.24432/C5G020}\hfill
- NIDDK clinical references\enspace
- \href{https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/tests-diagnosis}{Kidney tests} \enspace\textbar\enspace
- \href{https://www.niddk.nih.gov/health-information/kidney-disease/anemia}{Anemia} \enspace\textbar\enspace
- \href{https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/diabetic-kidney-disease}{Diabetic kidney disease}\hfill
- \href{https://github.com/CanyonChen/RenalLens}{github.com/CanyonChen/RenalLens}\par}
- \par\vskip0.48cm
- \end{beamercolorbox}}
+\usepackage{doi}
+\usepackage[numbers]{natbib}
+\usepackage[patch=none]{microtype}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{anyfontsize}
+\pdfstringdefDisableCommands{\def\translate#1{#1}}
+
+% Substitute the CityUHK palette in the template's existing color roles.
+\definecolor{maroon}{HTML}{941344}
+\definecolor{red}{HTML}{D2133F}
+\definecolor{violet}{HTML}{681132}
+\definecolor{lightgray}{HTML}{F6E5EA}
+\definecolor{darkgray}{HTML}{615961}
+
+\newlength{\sepwidth}
+\newlength{\colwidth}
+\setlength{\sepwidth}{0.025\paperwidth}
+\setlength{\colwidth}{0.3\paperwidth}
+\newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
+
+\title{RenalLens: Reading Beyond Urine Albumin}
+\author{BAI Yingdong \and CHEN Canyang \and LI Jiaheng \and PENG Peiyan \and ZHAI Junsong \and ZHANG Junjie}
+\institute[CityUHK]{City University of Hong Kong}
+\hypersetup{pdftitle={RenalLens: Reading Beyond Urine Albumin},
+  pdfauthor={BAI Yingdong, CHEN Canyang, LI Jiaheng, PENG Peiyan, ZHAI Junsong, ZHANG Junjie},
+  pdfsubject={DSC5002 RenalLens group project}}
+\footercontent{
+  \href{https://doi.org/10.24432/C5G020}{UCI Chronic Kidney Disease \enspace doi:10.24432/C5G020} \hfill
+  RenalLens \enspace --- \enspace DSC5002, C61 Group 65 \hfill
+  \href{https://github.com/CanyonChen/RenalLens}{github.com/CanyonChen/RenalLens}}
+
 \begin{document}
+\addtobeamertemplate{headline}{}
+{
+  \begin{tikzpicture}[remember picture,overlay]
+    \node [anchor=north east, inner sep=3cm] at ([xshift=0.0cm,yshift=2.5cm]current page.north east)
+      {\includegraphics[height=8.0cm]{../CityUHK_Logo_2.png}};
+  \end{tikzpicture}
+}
+
 \begin{frame}[t]
-\vspace*{0.65cm}
-\begin{beamercolorbox}[wd=\textwidth,sep=0.68cm]{summary}
- {\typeat{39}{46}\textbf{Record 43}\quad This patient had urine albumin grade 0 and no recorded history of diabetes. \textbf{Could anemia or high blood sugar still be present?}\par}
- \vspace{0.15cm}
- {\typeat{32}{39}We examined the 250 patients labeled with chronic kidney disease (CKD) in 400 UCI hospital records. Each comparison used the available measurements.\par}
-\end{beamercolorbox}
-\vspace{1.0cm}
+\begin{columns}[t]
+\separatorcolumn
 
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.312\textwidth}\raggedright
-\panelhead{KIDNEY FUNCTION}{What does urine grade 0 tell us?}
-\words{Albumin is a blood protein that can leak into urine when kidney filters are damaged. Grade 0 is the lowest urine albumin grade. Creatinine is a waste product the kidneys clear from blood.}
-\vspace{0.60cm}
-\includegraphics[width=\linewidth]{figures/albumin_range.pdf}
-\vspace{0.45cm}
-\words{At grade 0, creatinine spanned \textbf{0.6 to 24.0 mg/dL}. Record 43 measured \textbf{1.0 mg/dL}.}
-\vspace{0.45cm}
-\detail{Each dot is one patient. Among 197 patients with both tests across all grades, median creatinine was 1.30 mg/dL at grade 0 and 4.05 mg/dL at grade 4.}
+\begin{column}{\colwidth}
+  \begin{block}{What could the urine test miss in Record 43?}
+    This patient had chronic kidney disease (CKD), urine albumin grade~0 and no recorded history of diabetes. \textbf{Could anemia or high blood sugar still be present?}
+
+    Albumin is a blood protein that can leak into urine when kidney filters are damaged. Grade~0 is the lowest recorded grade. Creatinine is a waste product that the kidneys clear from the blood \citep{kidneytests}.
+
+    \begin{figure}
+      \centering
+      \includegraphics[width=.96\linewidth]{figures/albumin_range.pdf}
+      \caption{Each dot represents one of 47 grade-0 patients with a creatinine measurement. The diamond marks Record~43.}
+    \end{figure}
+  \end{block}
+
+  \begin{block}{How much did creatinine vary?}
+    \begin{itemize}
+      \item At grade~0, creatinine ranged from \textbf{0.6 to 24.0 mg/dL}. Record~43 measured \textbf{1.0 mg/dL}.
+      \item Among 197 patients with both tests, median creatinine was \textbf{1.30 mg/dL} at grade~0 and \textbf{4.05 mg/dL} at grade~4.
+    \end{itemize}
+  \end{block}
+
+  \begin{alertblock}{Which patients did we study?}
+    We examined \textbf{250 of 400 hospital records} in the UCI dataset, all labeled CKD \citep{uci}. We used the available measurements for each question. These records describe differences between patients at one point in time.
+  \end{alertblock}
 \end{column}
 
-\begin{column}{0.312\textwidth}\raggedright
-\panelhead{OXYGEN DELIVERY}{Why measure hemoglobin?}
-\words{Hemoglobin carries oxygen in red blood cells. The kidneys release a hormone that helps the body make these cells. Anemia means the blood has too few red cells or too little hemoglobin.}
-\vspace{0.60cm}
-\includegraphics[width=\linewidth]{figures/hemoglobin_fit.pdf}
-\vspace{0.45cm}
-\words{Across 198 patients, a doubling of creatinine was associated with \textbf{0.90 units lower} mean hemoglobin (95\% confidence interval 0.62--1.18 lower).}
-\vspace{0.45cm}
-\detail{Each circle is one patient. The shaded band gives the 95\% confidence interval for the mean. Hemoglobin is shown in the dataset's units.}
+\separatorcolumn
+
+\begin{column}{\colwidth}
+  \begin{block}{Why measure hemoglobin?}
+    Hemoglobin carries oxygen in red blood cells. The kidneys release a hormone that helps the body make these cells. With too few red cells or too little hemoglobin, a person has anemia \citep{anemia}.
+  \end{block}
+
+  \begin{block}{How did hemoglobin vary with creatinine?}
+    Across 198 patients with both blood tests, a doubling of creatinine was associated with \textbf{0.90 units lower mean hemoglobin} (95\% confidence interval 0.62--1.18 lower).
+
+    \begin{figure}
+      \centering
+      \includegraphics[width=.96\linewidth]{figures/hemoglobin_fit.pdf}
+      \caption{Each circle is a patient. The shaded band is the 95\% confidence interval for the fitted mean. Hemoglobin uses the units supplied by UCI.}
+    \end{figure}
+
+    Record~43 had \textbf{hemoglobin of 9.7} at creatinine of 1.0 mg/dL.
+  \end{block}
+
+  \begin{block}{Why check blood sugar as well?}
+    Persistently high blood sugar can damage blood vessels in the kidneys \citep{diabetes}. A diabetes history records a past diagnosis. A random glucose test measures blood sugar at the time of the test.
+
+    \begin{table}
+      \centering
+      \begin{tabular}{lrr}
+        \toprule
+        \textbf{Diabetes history} & \textbf{High / tested} & \textbf{Percent} \\
+        \midrule
+        No  & 11/87  & 12.6\% \\
+        Yes & 61/125 & 48.8\% \\
+        \bottomrule
+      \end{tabular}
+      \caption{High random glucose was defined as 200 mg/dL or above.}
+    \end{table}
+
+    Glucose was missing in 26 of 113 patients without a diabetes history and 12 of 137 with one. A single high reading requires clinical context to diagnose diabetes.
+  \end{block}
 \end{column}
 
-\begin{column}{0.312\textwidth}\raggedright
-\panelhead{BLOOD SUGAR}{Why check glucose as well?}
-\words{Long-term high blood sugar can damage kidney blood vessels. Diabetes history records a past diagnosis. A random glucose test measures blood sugar at the time of the test.}
-\vspace{0.45cm}
-{\typeat{32}{38}\setlength{\tabcolsep}{0pt}
-\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrr}
-\toprule
-Diabetes history & High / tested & Percent \\
-\midrule
-No  & 11/87  & 12.6\% \\
-Yes & 61/125 & 48.8\% \\
-\bottomrule
-\end{tabular*}\par}
-\vspace{0.35cm}
-\detail{High means random glucose of 200 mg/dL or above. Diagnosing diabetes requires clinical context. Glucose was missing in 26 of 113 patients without a diabetes history and 12 of 137 with one.}
-\vspace{0.70cm}
-{\typeat{36}{43}\bfseries\color{cityuburgundy}Who else had urine grade 0?\par}
-\vspace{0.18cm}
-\detail{Each symbol is one of 45 grade-0 patients with both anemia status and blood glucose recorded.}
-\vspace{0.25cm}
-\includegraphics[width=\linewidth]{figures/overlap_counts.pdf}
+\separatorcolumn
+
+\begin{column}{\colwidth}
+  \begin{exampleblock}{Who else had urine albumin grade 0?}
+    Of 45 grade-0 patients with both anemia status and glucose recorded, \textbf{16 had anemia or high glucose}. Two had both findings.
+
+    \begin{figure}
+      \centering
+      \includegraphics[width=.96\linewidth]{figures/overlap_counts.pdf}
+      \caption{One symbol represents one person. The arrow marks Record~43.}
+    \end{figure}
+
+    \heading{Back to Record 43}
+    The chart documented \textbf{anemia} and a random glucose of \textbf{204 mg/dL}. This patient was one of the two with both findings despite grade~0 urine albumin.
+  \end{exampleblock}
+
+  \begin{block}{How common were multiple findings across all grades?}
+    We counted urine albumin grade~1 or higher, recorded anemia, and random glucose of 200 mg/dL or above in each patient.
+
+    \textbf{70 of 175 patients (40\%)} with all three results had at least two findings. The other 75 records lacked at least one result. Counting unknown findings first as absent and then as present gives a range of \textbf{79--122 of all 250 patients (31.6--48.8\%)}.
+  \end{block}
+
+  \begin{block}{References}
+    {\footnotesize\bibliographystyle{plainnat}\bibliography{poster}}
+  \end{block}
 \end{column}
+
+\separatorcolumn
 \end{columns}
-\vfill
-\begin{beamercolorbox}[wd=\textwidth,sep=0.68cm]{summary}
-{\typeat{41}{48}\bfseries\color{cityuburgundy}Back to Record 43\quad Anemia was documented and random glucose was 204 mg/dL.\par}
-\vspace{0.18cm}
-{\typeat{35}{42}Among 45 grade-0 patients with all three results, \textbf{16 had anemia or high glucose}. Record 43 was \textbf{one of two who had both}.\par}
-\vspace{0.12cm}
-{\typeat{32}{39}Across all grades, \textbf{70 of 175 (40\%)} had at least two findings (urine albumin grade $\geq1$, recorded anemia, high glucose). Counting missing findings in 75 records as absent or present gives bounds of \textbf{79 to 122 of all 250 (31.6--48.8\%)}.\par}
-\end{beamercolorbox}
-\vspace*{0.6cm}
 \end{frame}
 \end{document}

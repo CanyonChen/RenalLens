@@ -1,4 +1,4 @@
-# RenalLens
+# RenalLens: Reading Beyond Urine Albumin
 
 **What can a blood test add to a urine result in chronic kidney disease?**\
 **一份尿检之外，血液检查还能告诉我们什么？**
@@ -6,6 +6,11 @@
 City University of Hong Kong · DSC5002 Exploratory Data Analysis and Visualization · C61, Group 65
 
 [Report / 报告](docs/report/RenalLens_Report.pdf) · [Poster / 海报](docs/poster/RenalLens_Poster.pdf) · [Slides / 离线演示](docs/presentation/deck.html) · [Slides PDF](docs/presentation/RenalLens_Presentation.pdf) · [Speaker notes / 讲稿](docs/presentation/Presenter_notes.md)
+
+| LaTeX | Project source / 项目源码 | Original template / 原始模板 |
+| --- | --- | --- |
+| Report / 报告 | [main.tex](docs/report/main.tex) | [report_template](docs/report/report_template/) |
+| Poster / 海报 | [main.tex](docs/poster/main.tex) | [poster_template](docs/poster/poster_template/) |
 
 ## Record 43 / 第 43 号病历
 
