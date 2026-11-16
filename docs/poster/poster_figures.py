@@ -28,8 +28,6 @@ BURGUNDY = "#8B1949"
 TEAL = "#00675F"
 GRAY = "#665F69"
 LIGHT = "#E1DDE1"
-RENAL_BLUE = "#225E92"
-BLOOD_GREEN = "#21684F"
 GLUCOSE_ORANGE = "#984607"
 DATA_VIEWS = (
     ("observed", "Measured", INK, "o"),
@@ -61,189 +59,59 @@ def flow_arrow(ax, start, end):
                             "mutation_scale": 14, "shrinkA": 0, "shrinkB": 0})
 
 
-def measured_pair_plots(ax, patients):
-    """Reproduce the three available-case clinical questions in JH's Figure 1."""
-    albumin = pd.read_csv(CLINICAL / "albumin_grades.csv").query("view == 'observed'")
-    rank = pd.read_csv(CLINICAL / "albumin_association.csv").query(
-        "view == 'observed' and sample == 'all_grades'").iloc[0]
-    pairs = patients.dropna(subset=["sc", "hemo"])
-    fit = pd.read_csv(CLINICAL / "anemia_fit.csv")
-    model = pd.read_csv(CLINICAL / "anemia_association.csv").query(
-        "view == 'observed' and sample == 'all_pairs'").iloc[0]
-    slope = f"{model.slope:.2f}".replace("-", "−")
-    risk = pd.read_csv(CLINICAL / "glucose_threshold.csv").query(
-        "view == 'observed'").set_index("dm").loc[["no", "yes"]]
-
-    flow_box(ax, .69, 2.33, 13.20, 3.46, GRAY)
-    centers = (2.89, 7.29, 11.69)
-    for divider in (5.09, 9.49):
-        ax.plot([divider, divider], [2.47, 5.64], color=LIGHT, lw=1)
-    subtitles = (
-        ("Urine albumin and creatinine", int(rank.n), "Creatinine (mg/dL, log scale)",
-         f"Spearman ρ = {rank.rho:.2f}", "Thin range, thick IQR, dot median"),
-        ("Creatinine and hemoglobin", len(pairs), "Hemoglobin (source units)",
-         f"{slope} Hb units per doubling", "Band shows 95% CI for mean Hb"),
-        ("Diabetes history and glucose", int(risk.n_measured.sum()), "Random glucose ≥200 mg/dL",
-         f"{risk.proportion.iloc[0]:.1%} vs {risk.proportion.iloc[1]:.1%} high glucose",
-         "Whiskers show 95% Wilson intervals"),
-    )
-    plots = []
-    for x, (title, n, unit, result, guide), color in zip(
-            centers, subtitles, (RENAL_BLUE, BLOOD_GREEN, GLUCOSE_ORANGE), strict=True):
-        ax.text(x, 5.52, title, fontsize=16.8, ha="center", va="center", weight="bold", color=color)
-        ax.text(x, 5.20, f"{n} measured pairs", fontsize=15.5, ha="center", va="center", color=INK)
-        p = ax.inset_axes([x - 1.49, 3.60, 3.22, 1.10], transform=ax.transData)
-        p.tick_params(axis="both", labelsize=13.8, pad=2, length=3.5)
-        p.spines[["top", "right"]].set_visible(False)
-        p.set_axisbelow(True)
-        p.grid(axis="y", color=LIGHT, lw=.7)
-        p.text(0, 1.10, unit, transform=p.transAxes, fontsize=14, ha="left", va="bottom")
-        ax.text(x, 2.89, result, fontsize=15.6, ha="center", va="center", color=color, weight="bold")
-        ax.text(x, 2.55, guide, fontsize=14, ha="center", va="center", color=GRAY)
-        plots.append(p)
-
-    kidneys, blood, sugar = plots
-    kidneys.vlines(albumin.grade, albumin["min"], albumin["max"], color=RENAL_BLUE, lw=1.3)
-    kidneys.vlines(albumin.grade, albumin.q1, albumin.q3, color=RENAL_BLUE, lw=6)
-    kidneys.scatter(albumin.grade, albumin["median"], facecolor="white", edgecolor=RENAL_BLUE,
-                    s=30, linewidth=1.15, zorder=3)
-    for row in albumin.loc[albumin.n_pairs.eq(1)].itertuples():
-        kidneys.annotate("n = 1", (row.grade, row.median), xytext=(0, 6),
-                         textcoords="offset points", ha="center", fontsize=13.5, color=GRAY)
-    kidneys.set_yscale("log")
-    kidneys.set(xlim=(-.45, 5.45), ylim=(.4, 42), xticks=range(6))
-    kidneys.set_yticks([.5, 2, 8, 32], ["0.5", "2", "8", "32"])
-    kidneys.set_xlabel("Urine albumin grade", fontsize=14, labelpad=2)
-
-    blood.fill_between(fit.sc, fit.ci_low, fit.ci_high, color="#CEE5D9", zorder=1)
-    blood.scatter(pairs.sc, pairs.hemo, s=9, color="#4E886C", linewidth=0, zorder=2)
-    blood.plot(fit.sc, fit.mean_hemo, color=BLOOD_GREEN, lw=2.2, zorder=3)
-    blood.set_xscale("log", base=2)
-    blood.set(xlim=(.48, 90), ylim=(2, 18), yticks=[4, 10, 16])
-    blood.set_xticks([1, 4, 16, 64], ["1", "4", "16", "64"])
-    blood.set_xlabel("Creatinine (mg/dL, log₂ scale)", fontsize=14, labelpad=2)
-
-    for pos, row in enumerate(risk.itertuples()):
-        sugar.errorbar(pos, row.proportion, yerr=[[row.proportion - row.ci_low],
-                      [row.ci_high - row.proportion]], fmt=("o", "D")[pos],
-                      markerfacecolor=("white", GLUCOSE_ORANGE)[pos], color=GLUCOSE_ORANGE,
-                      markeredgewidth=1.35, lw=1.6, capsize=4, markersize=6)
-        sugar.annotate(f"{row.n_high}/{row.n_measured}", (pos, row.proportion),
-                       xytext=(7, 0), textcoords="offset points", fontsize=13.8, va="center",
-                       color=GLUCOSE_ORANGE)
-    sugar.set(xlim=(-.36, 1.68), ylim=(0, .68))
-    sugar.set_yticks([0, .25, .50], ["0%", "25%", "50%"])
-    sugar.set_xticks([0, 1], ["No history", "History"])
-    sugar.set_xlabel("Recorded diabetes history", fontsize=14, labelpad=2)
-
-
-def grade_zero_branch(ax, patients):
-    """Count overlapping findings on the same jointly observed patient records."""
-    grade = measured_grade_zero(patients)
-    anemia = grade.anemia.eq(1)
-    high = grade.high_glucose.eq(1)
-    retained = grade.loc[grade.complete_case]
-    n_joint = len(patients.dropna(subset=["al", "anemia", "high_glucose"]))
-
-    flow_box(ax, .69, .08, 13.20, 2.00, GRAY)
-    ax.text(1.00, 1.79, "Urine albumin grade 0", fontsize=17.3, weight="bold", va="center")
-    ax.text(1.00, 1.21, f"{n_joint} had urine albumin, anemia\nstatus and glucose recorded.",
-            fontsize=14.6, va="center", linespacing=1.2)
-    ax.text(1.00, .49, f"{len(grade)} of these had grade 0.", fontsize=15.1,
-            va="center", weight="bold")
-
-    ax.text(6.65, 1.79, "Patients by finding", ha="center", va="center",
-            fontsize=14.7, weight="bold")
-    outcomes = [
-        ("Anemia only", anemia & ~high, BLOOD_GREEN), ("Both", anemia & high, BURGUNDY),
-        ("High glucose only", ~anemia & high, GLUCOSE_ORANGE), ("Neither", ~anemia & ~high, GRAY),
-    ]
-    bars = ax.inset_axes([6.48, .21, 2.06, 1.32], transform=ax.transData)
-    for y, (label, mask, color) in enumerate(outcomes):
-        n = int(mask.sum())
-        bars.barh(y, n, .48, color=color)
-        bars.annotate(str(n), (n, y), xytext=(4, 0), textcoords="offset points",
-                      va="center", weight="bold", fontsize=13.8, color=color)
-    bars.set(yticks=range(4), yticklabels=[row[0] for row in outcomes], xticks=[],
-             xlim=(0, max(mask.sum() for _, mask, _ in outcomes) * 1.22), ylim=(3.55, -.55))
-    bars.tick_params(axis="y", length=0, pad=4, labelsize=13.5)
-    bars.spines[["bottom", "top", "right"]].set_visible(False)
-    flow_arrow(ax, (8.70, 1.02), (9.10, 1.02))
-    ax.text(9.28, 1.65, f"{grade.finding.sum()} of {len(grade)} had a finding",
-            fontsize=16.5, weight="bold", color=BURGUNDY, va="center")
-    ax.text(9.28, 1.23, "Anemia or glucose ≥200 mg/dL.", fontsize=14.2, va="center")
-    ax.text(9.28, .62, f"All 24 fields present in {len(retained)} of {len(grade)}.\n"
-            f"Of the {grade.finding.sum()} with a finding, {retained.finding.sum()} remained.",
-            va="center", fontsize=14.2, linespacing=1.22)
-
-
 def missing_data_paths():
-    """Nest the clinical analyses in RenalLensPoster/figures/Figure_1.svg under available cases."""
+    """Follow the same source records through three missing-data rules."""
     values = pd.read_csv(TABLES / "measurement_values.csv")
     glucose = values.loc[values.feature.eq("bgr")].set_index("row_id")
     ckd = glucose.loc[glucose.group.eq("ckd")]
     complete = glucose.loc[glucose.complete_case]
     n_complete_ckd = complete.group.eq("ckd").sum()
     case = glucose.loc[43]
-    patients = pd.read_csv(PATIENTS)
 
     # Use the same view colors as the hemoglobin figure. Every path also has
     # a method name and an explicit patient disposition for monochrome prints.
     paths = [
         ("Available case", INK, "Use the measured fields\neach question needs.",
-         f"Glucose tests in {ckd.observed.count()}/{len(ckd)} CKD records",
+         f"Glucose measured in\n{ckd.observed.count()}/{len(ckd)} CKD records",
          "Record 43 retained", f"{case.observed:.0f} mg/dL measured"),
         ("Complete case", BURGUNDY, "Require all 24 fields\nto be present.",
-         f"{len(complete)} retained ({n_complete_ckd} CKD, {len(complete) - n_complete_ckd} non-CKD)",
+         f"{len(complete)} retained\n{n_complete_ckd} CKD + {len(complete) - n_complete_ckd} non-CKD",
          "Record 43 excluded", f"{case.observed:.0f} mg/dL omitted"),
         ("Single imputation", TEAL, "Pooled median for numbers,\npooled mode for categories.",
-         f"{len(glucose)} retained ({len(ckd)} CKD, {len(glucose) - len(ckd)} non-CKD)",
+         f"{len(glucose)} retained\n{len(ckd)} CKD + {len(glucose) - len(ckd)} non-CKD",
          "Record 43 retained", f"{case.imputed:.0f} mg/dL measured"),
     ]
     pink = "#F6E5EA"  # Gemini alert-block background
-    fig = plt.figure(figsize=(14, 9.75), facecolor=pink)
-    ax = fig.add_axes((0, 0, 1, 1), xlim=(0, 14), ylim=(0, 9.75))
+    fig = plt.figure(figsize=(14, 5.0), facecolor=pink)
+    ax = fig.add_axes((0, 0, 1, 1), xlim=(0, 14), ylim=(0, 5.0))
     ax.axis("off")
 
     centers = (2.37, 7, 11.63)
-    flow_box(ax, 4.14, 9.01, 5.72, .66, BURGUNDY)
-    ax.text(7, 9.46, f"{len(glucose)} UCI patient records", ha="center", va="center",
-            fontsize=20, weight="bold", color=INK)
-    ax.text(7, 9.16, f"{len(ckd)} CKD + {len(glucose) - len(ckd)} non-CKD",
-            ha="center", va="center", fontsize=16, color=INK)
-    ax.plot([7, 7], [9.01, 8.88], color=GRAY, lw=1.6)
-    ax.plot([centers[0], centers[-1]], [8.88, 8.88], color=GRAY, lw=1.6)
+    flow_box(ax, 4.14, 4.18, 5.72, .75, BURGUNDY)
+    ax.text(7, 4.68, f"{len(glucose)} UCI patient records", ha="center", va="center",
+            fontsize=23, weight="bold", color=INK)
+    ax.text(7, 4.33, f"{len(ckd)} CKD + {len(glucose) - len(ckd)} non-CKD",
+            ha="center", va="center", fontsize=18, color=INK)
+    ax.plot([7, 7], [4.18, 3.96], color=GRAY, lw=1.6)
+    ax.plot([centers[0], centers[-1]], [3.96, 3.96], color=GRAY, lw=1.6)
 
     for x, (method, color, rule, sample, disposition, reading) in zip(centers, paths, strict=True):
-        flow_box(ax, x - 2.23, 6.55, 4.46, 2.10, color)
-        flow_arrow(ax, (x, 8.89), (x, 8.66))
-        ax.text(x, 8.41, method, ha="center", va="center", fontsize=18.4,
+        flow_box(ax, x - 2.23, 1.55, 4.46, 2.16, color)
+        flow_arrow(ax, (x, 3.96), (x, 3.72))
+        ax.text(x, 3.39, method, ha="center", va="center", fontsize=22,
                 weight="bold", color=color)
-        ax.text(x, 7.98, rule, ha="center", va="center", fontsize=15.4, linespacing=1.12, color=INK)
-        ax.text(x, 7.51, sample, ha="center", va="center", fontsize=14.8, color=INK)
-        ax.plot([x - 1.97, x + 1.97], [7.28, 7.28], lw=.9, color=color)
-        ax.text(x, 7.05, disposition, ha="center", va="center", fontsize=15.8,
+        ax.text(x, 2.79, rule, ha="center", va="center", fontsize=18, linespacing=1.15, color=INK)
+        ax.text(x, 1.99, sample, ha="center", va="center", fontsize=16.3, color=INK,
+                linespacing=1.16)
+        flow_arrow(ax, (x, 1.55), (x, 1.27))
+        flow_box(ax, x - 2.23, .12, 4.46, 1.14, color)
+        ax.text(x, .89, disposition, ha="center", va="center", fontsize=20,
                 weight="bold", color=color)
-        ax.text(x, 6.75, reading, ha="center", va="center", fontsize=15, color=INK)
-
-    flow_arrow(ax, (centers[0], 6.55), (centers[0], 6.40))
-    flow_box(ax, .12, 5.95, 7.02, .44, INK)
-    ax.text(3.63, 6.17, f"Available-case analyses within the {len(ckd)} CKD records",
-            ha="center", va="center", fontsize=16.1, weight="bold", color=INK)
-    ax.text(7.42, 6.17, "A record can contribute to more than one analysis.",
-            va="center", fontsize=14, color=GRAY)
-    ax.plot([.30, .30], [5.95, 1.76], color=GRAY, lw=1.55)
-    flow_arrow(ax, (.30, 5.49), (.67, 5.49))
-    flow_arrow(ax, (.30, 1.76), (.67, 1.76))
-    measured_pair_plots(ax, patients)
-    grade_zero_branch(ax, patients)
+        ax.text(x, .45, reading, ha="center", va="center", fontsize=18, color=INK)
 
     save(fig, "missing_data_paths.pdf",
-         "Adapted from the JH poster's Figure 1. Three missing-data rules applied to the "
-         "same 400 records. The measured CKD branch "
-         "contains three overlapping paired analyses and a separate grade-zero subgroup. "
-         "Of 45 jointly observed grade-zero records, 16 had anemia or high glucose. "
-         "Only one of the 45 met the 24-field rule and none of the 16 findings remained.")
+         "Three missing-data rules applied to the same 400 records, followed by their "
+         "consequences for Record 43's measured glucose of 204 mg/dL.")
 
 
 def cohort():
@@ -251,11 +119,11 @@ def cohort():
     top = rates.loc[rates.group.eq("all")].nlargest(5, "n_missing")
     labels = {"rbc": "Red cell assessment", "rbcc": "Red cell count",
               "wbcc": "White cell count", "pot": "Potassium", "sod": "Sodium"}
-    retention = pd.read_csv(TABLES / "retention.csv").set_index("group")
+    eligibility = pd.read_csv(TABLES / "eligibility_rules.csv").set_index(["rule", "group"])
     shifts = pd.read_csv(TABLES / "median_shifts.csv").query("feature == 'sc'").set_index("group")
     fig, (fields, mix, medians) = plt.subplots(
-        1, 3, figsize=(15.2, 3.95), layout="constrained",
-        gridspec_kw={"width_ratios": [1.20, 1.05, 1.03], "wspace": .045})
+        1, 3, figsize=(15.2, 6.25), layout="constrained",
+        gridspec_kw={"width_ratios": [1.20, 1.28, 1.03], "wspace": .045})
     fields.set_title("Most often missing", loc="left")
     y = np.arange(len(top))
     counts = top.n_missing.to_numpy()
@@ -267,22 +135,25 @@ def cohort():
                xlim=(0, 245), xlabel="Missing records (of 400)")
     fields.invert_yaxis()
 
-    mix.set_title("Records retained", loc="left")
-    strategies = [("n_total", "All"), ("n_complete", "Complete")]
-    for pos, (column, _) in enumerate(strategies):
+    mix.set_title("Eligibility changes the cohort", loc="left")
+    strategies = [(None, "All records"), ("core5", "5 markers"), ("all24", "24 fields")]
+    for pos, (rule, _) in enumerate(strategies):
         left = 0
         for group, color, hatch in [("ckd", BURGUNDY, ""), ("notckd", TEAL, "///")]:
-            n = retention.loc[group, column]
+            n = eligibility.loc[("all24", group), "n_original_group"] if rule is None else eligibility.loc[(rule, group), "n_retained"]
             mix.barh(pos, n, .55, left=left, facecolor=color, edgecolor="white", hatch=hatch, lw=1)
             mix.text(left + n / 2, pos, str(int(n)), ha="center", va="center", color="white",
                      fontsize=13, weight="bold", bbox={"fc": color, "ec": "none", "pad": 1})
             left += n
-    mix.set(yticks=[0, 1], yticklabels=[x[1] for x in strategies], xlim=(0, 402),
+        share = 250 / 400 if rule is None else eligibility.loc[(rule, "ckd"), "share_of_retained"]
+        mix.text(left + 7, pos, f"{share:.1%}", va="center", fontsize=11.8, color=BURGUNDY,
+                 weight="bold")
+    mix.set(yticks=[0, 1, 2], yticklabels=[x[1] for x in strategies], xlim=(0, 510),
             xticks=[0, 200, 400], xlabel="Patient records")
-    mix.set_ylim(1.50, -.79)
+    mix.set_ylim(2.55, -.95)
     mix.legend(handles=[plt.Rectangle((0, 0), 1, 1, fc=BURGUNDY, label="CKD"),
                         plt.Rectangle((0, 0), 1, 1, fc=TEAL, hatch="///", ec="white", label="Non-CKD")],
-               loc="upper right", bbox_to_anchor=(1, 1.04), ncol=2, handlelength=1.2, fontsize=12)
+               loc="upper right", bbox_to_anchor=(1, 1.04), ncol=2, handlelength=1.2, fontsize=11.5)
     for ax in (fields, mix):
         ax.spines["left"].set_visible(False)
         ax.tick_params(axis="y", length=0)
@@ -300,8 +171,9 @@ def cohort():
     medians.set(xlim=(-.22, 1.69), ylim=(0, 4.9), yticks=[0, 2, 4],
                 xticks=[0, 1], xticklabels=["Measured", "Complete"])
     medians.grid(axis="y", color=LIGHT, lw=.8)
-    save(fig, "cohort_selection.pdf", "Missingness, retention by diagnosis and the opposite "
-         "changes in median creatinine overall and within CKD after complete-case deletion.")
+    save(fig, "cohort_selection.pdf", "Missingness, eligibility by diagnosis for all records, "
+         "five-marker complete cases and all-24-field complete cases, plus the opposite "
+         "changes in median creatinine overall and within CKD under the all-24 rule.")
 
 
 def hemoglobin():
@@ -444,23 +316,32 @@ def glucose_bounds():
 
 def pca_scale():
     pc1 = pd.read_csv(TABLES / "pca_variance.csv").query("component == 'PC1'").set_index("scale")
-    fig, ax = plt.subplots(figsize=(8.9, 1.27))
-    fig.subplots_adjust(left=.236, right=.978, bottom=.04, top=.96)
-    for y, key in [(1, "raw"), (0, "zscore")]:
+    weights = pd.read_csv(TABLES / "pca_loadings.csv").query("component == 'PC1'").set_index(["scale", "feature"])
+    features = ["hemo", "sc", "bu", "bgr", "bp"]
+    labels = ["Hemoglobin", "Creatinine", "Blood urea", "Glucose", "Blood pressure"]
+    fig, axes = plt.subplots(1, 2, figsize=(8.9, 2.70), sharey=True)
+    fig.subplots_adjust(left=.19, right=.975, bottom=.20, top=.81, wspace=.25)
+    for ax, key, name in zip(axes, ["raw", "zscore"], ["Original units", "Unit variance"], strict=True):
         share = pc1.loc[key, "explained_fraction"]
-        ax.barh(y, 1, height=.68, color="#EEEBF0")
-        ax.barh(y, share, height=.68, color="#634E78")
-        ax.text(share / 2, y, f"PC1   {share:.1%}", ha="center", va="center",
-                color="white", weight="bold", fontsize=13.2)
-        ax.text((1 + share) / 2, y, "Other components", ha="center", va="center",
-                color=GRAY, fontsize=12.1)
-    ax.set(xlim=(0, 1), ylim=(-.54, 1.54), xticks=[], yticks=[1, 0],
-           yticklabels=["Original units", "Unit variance"])
-    ax.spines[:].set_visible(False)
-    ax.tick_params(axis="y", length=0, pad=7, labelsize=13.2)
+        coefficients = np.array([weights.loc[(key, feature), "eigenvector_weight"] for feature in features])
+        ax.axvline(0, color=GRAY, lw=.9)
+        ax.barh(np.arange(5), coefficients, height=.55, color="#634E78")
+        for y, coefficient in enumerate(coefficients):
+            ax.annotate(f"{coefficient:+.2f}", (coefficient, y),
+                        xytext=(4 if coefficient >= 0 else -4, 0), textcoords="offset points",
+                        ha="left" if coefficient >= 0 else "right", va="center", fontsize=11.1)
+        ax.set_title(f"{name}\nPC1: {share:.1%} of variance", fontsize=12.6, pad=8)
+        ax.set(xlim=(-.78, 1.25), ylim=(4.6, -.6), xticks=[-.5, 0, .5, 1],
+               xticklabels=["−0.5", "0", "0.5", "1.0"])
+        ax.grid(axis="x", color=LIGHT, lw=.6)
+        ax.spines[["left", "top", "right"]].set_visible(False)
+        ax.tick_params(axis="y", length=0, pad=7, labelsize=11.6)
+        ax.tick_params(axis="x", labelsize=10.8, length=3)
+    axes[0].set_yticks(np.arange(5), labels)
+    fig.text(.59, .025, "Signed PC1 eigenvector coefficient", ha="center", fontsize=11.8)
     save(fig, "pca_scale.pdf",
-         "Each bar represents 100% of five-marker variance under one scaling, using the same "
-         "400 imputed records. PC1 accounts for 68.8% in original units and 43.3% after scaling.")
+         "Signed PC1 eigenvector coefficients for five markers in the same 400 imputed "
+         "records. Original-unit PC1 explains 68.8% of variance; unit-variance PC1 explains 43.3%.")
 
 
 def grade_zero():

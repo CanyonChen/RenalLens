@@ -192,12 +192,19 @@ def _json_value(value):
 
 
 def write_report(name: str, payload: dict, output_dir: Path) -> None:
+    from site_support import NAV_STYLE, navigation
     templates = Path(__file__).with_name("views")
     page = (templates / f"{name}.html").read_text(encoding="utf-8")
     style = (templates / "report.css").read_text(encoding="utf-8")
     data = json.dumps(_json_value(payload), ensure_ascii=False, allow_nan=False, separators=(",", ":"))
     # Keep JSON strings inside the embedded data block, including any literal </script> text.
-    page = page.replace("__REPORT_CSS__", style).replace("__STUDY_DATA__", data.replace("<", "\\u003c"))
+    page = page.replace("__REPORT_CSS__", style + "\n" + NAV_STYLE)
+    page = page.replace("__PROJECT_NAV__", navigation("../../", f"results/figures/{name}.html"))
+    for marker, filename in (("__PAGE_SCRIPT__", f"{name}.js"),
+                             ("__EXPLORER_MATH__", "explorer-math.js"), ("__STATE_SCRIPT__", "state.js")):
+        if marker in page:
+            page = page.replace(marker, (templates / filename).read_text(encoding="utf-8"))
+    page = page.replace("__STUDY_DATA__", data.replace("<", "\\u003c"))
     figures = output_dir / "figures"
     figures.mkdir(parents=True, exist_ok=True)
     (figures / f"{name}.html").write_text(page, encoding="utf-8")

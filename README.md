@@ -5,7 +5,30 @@
 
 City University of Hong Kong · DSC5002 Exploratory Data Analysis and Visualization · C61, Group 65
 
-[Report / 报告](docs/report/RenalLens_Report.pdf) · [Poster / 海报](docs/poster/RenalLens_Poster.pdf) · [Full analysis / 全队列分析](docs/reanalysis/missing_data.html) · [Case-study slides / 病例专题演示](docs/presentation/deck.html) · [Slides PDF](docs/presentation/RenalLens_Presentation.pdf) · [Case-study speaker notes / 病例讲稿](docs/presentation/Presenter_notes.md)
+[项目首页](docs/index.html) · [患者与缺失值交互](docs/results/figures/cohort.html) · [尺度与 PCA 交互](docs/results/figures/scales.html)
+
+[Report / 报告](docs/report/RenalLens_Report.pdf) · [Poster / 海报](docs/poster/RenalLens_Poster.pdf) · [Full analysis / 全队列分析](docs/reanalysis/missing_data.html) · [Project slides / 项目演示](docs/presentation/deck.html) · [Slides PDF](docs/presentation/RenalLens_Presentation.pdf) · [Speaker notes / 讲稿](docs/presentation/Presenter_notes.md)
+
+下载或 clone 后，从 `docs/index.html` 打开项目。两个交互页嵌入全部数据，支持离线浏览；网址保存当前患者、字段和处理方式，可复制或收藏。GitHub 文件预览只显示 HTML 源码。
+
+### Build and verify / 一次重建与检查
+
+安装项目指定的 uv 后，在仓库根目录运行（Windows、macOS、Linux 共用）：
+
+```sh
+uv sync --locked
+npm ci
+npx playwright install chromium
+uv run --locked python scripts/build.py --download --check --package
+```
+
+这条命令校验 UCI 原始输入的 SHA256，重建处理数据、全套数值表、静态图、两份交互页、首页及 8 页演示，运行数值测试和真实浏览器检查，并生成 `outputs/RenalLens-offline.zip`。`--download` 仅在原文件缺失时下载。重复运行会刷新生成文件，不追加重复导航。
+
+增加 `--pdf` 可重建演示、海报和报告 PDF；演示使用本机 Chrome（环境变量 `CHROME` 可指定路径），海报和报告使用 Tectonic 或 latexmk。字体与编译步骤见 [PDF 构建说明](docs/poster/BUILD.md)。默认保留仓库中已核验的 PDF。只核查交互可运行 `npm test` 和 `npm run check:browser`。
+
+完整规则现有三种：**24 项齐全**保留 158 人（43 CKD、115 非 CKD）；**五项核心指标齐全**保留 300 人（165 CKD、135 非 CKD）；**当前分析字段齐全**按单变量或散点所需两字段决定。原版 24 项结果及临床分层表保持为基线。[规则对照 CSV](docs/reanalysis/tables/eligibility_rules.csv)
+
+合并到 `main` 后，Pages workflow 可构建并发布 `docs/`；仓库 Pages 的 Source 需设为 GitHub Actions。分支上传与站点发布是两个独立状态。
 
 | LaTeX | Project source / 项目源码 | Original template / 原始模板 |
 | --- | --- | --- |

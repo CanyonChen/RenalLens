@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RenalLens · 缺失记录怎样改变 CKD 的临床图景</title>
-
 <style>
 :root { color-scheme:light; --ink:#183532; --muted:#4f6763; --teal:#146a61; --rust:#984426; --rule:#c9d8d2; }
 * { box-sizing:border-box }
@@ -54,7 +53,11 @@ main.study { width:min(100%,1080px); max-width:1080px; margin:auto; padding:26px
 @media print { body { background:white } .study nav,.study dialog,.zoom-hint { display:none } .study figure { break-inside:avoid } main.study { width:100%; padding:0 } }
 </style>
 </head>
-<body><main class="study">
+<body><main class="study"><!-- project-navigation --><style>.project-nav{display:flex;flex-wrap:wrap;gap:8px 20px;padding:16px 0;
+border-bottom:1px solid #cfdbd7;font:14px/1.6 Arial,'Microsoft YaHei',sans-serif}
+.project-nav a{color:#156368;text-decoration:underline;text-underline-offset:3px}
+.project-nav a[aria-current=page]{font-weight:700;color:#941344}
+@media print{.project-nav{display:none}}</style><nav class="project-nav" aria-label="项目导航"><a href="./index.html">项目首页</a><a href="./results/figures/cohort.html" id="cohort-link" data-carry-patient="true">患者与缺失值交互</a><a href="./results/figures/scales.html" id="pca-link" data-carry-patient="true">尺度与 PCA 交互</a><a href="./reanalysis/missing_data.html">分析与数据</a><a href="./presentation/deck.html">项目演示</a></nav><!-- /project-navigation -->
 <div class="mast"><b>RenalLens</b><span>DSC5002 · UCI 慢性肾病队列 · 2026 年 11 月 7 日</span></div>
 <header>
 <h1>删去缺项后，为什么全体肌酐下降，CKD 组内却升高？</h1>

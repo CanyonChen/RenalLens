@@ -6,13 +6,23 @@
 <title>哪些患者被留下？｜RenalLens 统计重分析</title>
 <link rel="stylesheet" href="report.css">
 </head>
-<body><main>
+<body><main><!-- project-navigation --><style>.project-nav{display:flex;flex-wrap:wrap;gap:8px 20px;padding:16px 0;
+border-bottom:1px solid #cfdbd7;font:14px/1.6 Arial,'Microsoft YaHei',sans-serif}
+.project-nav a{color:#156368;text-decoration:underline;text-underline-offset:3px}
+.project-nav a[aria-current=page]{font-weight:700;color:#941344}
+@media print{.project-nav{display:none}}</style><nav class="project-nav" aria-label="项目导航"><a href="../index.html">项目首页</a><a href="../results/figures/cohort.html" id="cohort-link" data-carry-patient="true">患者与缺失值交互</a><a href="../results/figures/scales.html" id="pca-link" data-carry-patient="true">尺度与 PCA 交互</a><a href="../reanalysis/missing_data.html" aria-current="page">分析与数据</a><a href="../presentation/deck.html">项目演示</a></nav><!-- /project-navigation -->
 <header>
 <div class="by"><span lang="en">RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease</span> · 全队列分析 · <a href="index.html">CKD 病例专题</a></div>
 <h1>哪些患者被留下？</h1>
 <p class="lead">在这 400 条慢性肾病研究记录中，要求所有字段齐全会优先留下非 CKD 患者。总体肌酐看起来下降了，而在留下来的 CKD 患者中，肌酐反而更高。用一个全体中位数填补时，两组的误差也朝相反方向。</p>
 <nav aria-label="报告目录"><a href="#selection">病例筛选</a><a href="#imputation">填补验证</a><a href="#sensitivity">相关性与尺度</a><a href="#methods">方法与数据</a></nav>
 </header>
+<!-- eligibility-comparison --><section id="eligibility">
+<h2>完整，究竟要求哪些字段？</h2>
+<p>删除规则由当前研究问题需要的字段决定。保留原始读数，只改变参与分析的患者集合，就得到以下对照。表中高血糖指随机血糖 ≥200 mg/dL，分母为所保留 CKD 患者中血糖实测的人数。</p>
+<div class="table-wrap" style="overflow-x:auto"><table><caption>字段要求与可观察人群</caption><thead><tr><th scope="col">完整要求</th><th scope="col">全体保留</th><th scope="col">CKD 保留</th><th scope="col">非 CKD 保留</th><th scope="col">CKD 高血糖 / 血糖实测</th></tr></thead><tbody><tr><th scope="row">全部 24 项</th><td>158 / 400</td><td>43 / 250</td><td>115 / 150</td><td>20 / 43（46.5%）</td></tr><tr><th scope="row">5 个核心指标</th><td>300 / 400</td><td>165 / 250</td><td>135 / 150</td><td>61 / 165（37.0%）</td></tr><tr><th scope="row">肌酐与尿素</th><td>380 / 400</td><td>236 / 250</td><td>144 / 150</td><td>71 / 207（34.3%）</td></tr><tr><th scope="row">随机血糖</th><td>356 / 400</td><td>212 / 250</td><td>144 / 150</td><td>72 / 212（34.0%）</td></tr></tbody></table></div>
+<p>第 43 号病历仅缺红细胞评估 rbc；其五项核心指标均有实测值。24 项规则会删除这条记录，5 项规则保留其 204 mg/dL 的随机血糖。完整病例结果同时依赖字段要求与缺失结构。</p>
+<p><a href="tables/eligibility_rules.csv">下载规则对照 CSV</a> · <a href="../results/figures/cohort.html?patient=43&amp;feature=bgr&amp;view=complete_case">交互追踪病例 43</a></p></section><!-- /eligibility-comparison -->
 <section id="selection">
 <h2>一、总体肌酐为何在删行后下降？</h2>
 <p>完整病例要求 24 个解释变量全部有记录。CKD 患者仅留下 43/250 人（17.2%），非 CKD 患者留下 115/150 人（76.7%）。两组保留率之差为 <strong>−59.5 个百分点</strong>，95% CI [−66.8, −50.5]，双侧 Fisher 精确检验 <i>p</i> &lt; .001。400 人里有 62.5% 属于 CKD，留下的 158 人里只有 27.2%。缺失最多的字段是红细胞评估（152/400），其次是红细胞计数（131/400）和白细胞计数（106/400）。</p>
@@ -72,7 +82,7 @@
 <p>这是一项已有探索结果基础上的再分析。研究对象是 UCI CKD 的全部 400 条患者记录，按每行一名患者计算。诊断标签仅用于分组。数值缺失按全体实测中位数、类别缺失按众数填补；留出验证则逐折重新求中位数。原始观测视角对每个指标或指标对使用当时可用的记录。本次从原始 CSV 重跑的 15 张原版结果表与仓库发布版本数值一致。</p>
 <p>保留率按组给 Wilson 区间，两组差值给 Newcombe 区间；保留与诊断的关联使用一次双侧 Fisher 精确检验（样本优势比 0.063，<i>p</i> = 6.65 × 10<sup>−33</sup>）。中位数、相关系数及其差值使用 5,000 次患者级分层 bootstrap，固定 CKD/非 CKD 人数，每次对同一批抽到的患者计算两个视角，以第 2.5 和 97.5 百分位为端点。重新加权的区间每次重估组别权重。区间均为逐项 95% 区间，未作同时覆盖校正。填补后的描述量与五折验证误差按观测结果报告。</p>
 <p>统计推断把患者记录视为相互独立；数据未提供可用于核对重复就诊或聚类的标识。按组检查了样本量、缺失、均值、标准差、四分位距、Tukey 围栏及偏度，并以 Shapiro–Wilk 和中位数中心 Levene 作分布诊断。右偏且全为正值的指标另看自然对数分布。所有原始观测均保留。本样本的保留差、组别构成和相关性依赖于记录方式，不能给出人群患病率、缺失机制或因果效应。</p>
-<div class="links"><a href="tables/diagnostics.csv">分布诊断</a><a href="tables/log_comparison.csv">原值及对数</a><a href="tables/extreme_observations.csv">极端观测记录</a><a href="tables/clinical_strata.csv">五项临床分层比较</a><a href="tables/analysis_metadata.csv">数据校验值、版本与随机种子</a><a href="../../README.md">复跑命令</a></div>
+<div class="links"><a href="tables/diagnostics.csv">分布诊断</a><a href="tables/log_comparison.csv">原值及对数</a><a href="tables/extreme_observations.csv">极端观测记录</a><a href="tables/clinical_strata.csv">五项临床分层比较</a><a href="tables/analysis_metadata.csv">数据校验值、版本与随机种子</a><a href="../development/SOURCE_MAP.md">复跑命令</a></div>
 </section>
 <footer>
 <p>数据来源为 Rubini、Soundarapandian 与 Eswaran（2015）的 Chronic Kidney Disease 数据集，许可 CC BY 4.0。<a href="https://doi.org/10.24432/C5G020">UCI 数据与字典</a></p>

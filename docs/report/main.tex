@@ -55,7 +55,7 @@
 \begin{figure}[H]
   \centering
   \includegraphics[width=.95\columnwidth]{figures/sample_composition.pdf}
-  \caption{\textbf{Who remains after deletion?} Each bar shows the diagnostic mix before or after requiring all 24 fields. Only 43/250 CKD records (17.2\%) remained, compared with 115/150 non-CKD records (76.7\%). CKD's share fell from 62.5\% to 27.2\%. The most frequently missing field was the red blood cell assessment (152/400).}
+  \caption{\textbf{Eligibility changes the cohort.} Requiring five markers (hemoglobin, creatinine, urea, glucose and blood pressure) retained 300 records: 165 CKD and 135 non-CKD. Requiring all 24 fields retained 158: 43 CKD and 115 non-CKD. CKD's share was 55.0\% vs 27.2\% (62.5\% originally). The most often missing field was the red cell assessment (152/400).}
 \end{figure}
 
 \begin{table}[H]
@@ -100,6 +100,6 @@ Figure preparation: \href{https://doi.org/10.48550/arXiv.2609.00065}{Scientific 
   \caption{\textbf{Creatinine and blood urea.} Deletion strengthened the linear correlation (Pearson) and weakened the rank correlation (Spearman). Whiskers show 95\% bootstrap intervals from 5,000 resamples within diagnosis groups. Diamonds show estimates after filling gaps.}
 \end{figure}
 
-\noindent\textbf{Checks on extremes and scale.} Omitting the highest creatinine (76~mg/dL) moved Pearson from 0.586 to 0.674 and Spearman from 0.703 to 0.701 among measured pairs. Taking logs reduced creatinine skewness from 7.51 to 1.03 ($n=383$). For hemoglobin, creatinine, urea, glucose and blood pressure in the same 400 imputed records, the first principal component explained 68.8\% of variance in original units and 43.3\% after standardization.
+\noindent\textbf{Checks on extremes and scale.} Omitting the highest creatinine (76~mg/dL) moved Pearson from 0.586 to 0.674 and Spearman from 0.703 to 0.701 among measured pairs. Taking logs reduced creatinine skewness from 7.51 to 1.03 ($n=383$). In the same 400 imputed records, five-marker PC1 explained 68.8\% in original units, dominated by glucose (coefficient $+0.990$). After standardization it explained 43.3\%, led by urea ($+0.566$), hemoglobin ($-0.534$) and creatinine ($+0.491$).
 
 \end{document}

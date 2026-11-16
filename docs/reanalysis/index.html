@@ -4,7 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease｜CKD 病例专题</title>
 <link rel="stylesheet" href="report.css">
-</head><body><main>
+</head><body><main><!-- project-navigation --><style>.project-nav{display:flex;flex-wrap:wrap;gap:8px 20px;padding:16px 0;
+border-bottom:1px solid #cfdbd7;font:14px/1.6 Arial,'Microsoft YaHei',sans-serif}
+.project-nav a{color:#156368;text-decoration:underline;text-underline-offset:3px}
+.project-nav a[aria-current=page]{font-weight:700;color:#941344}
+@media print{.project-nav{display:none}}</style><nav class="project-nav" aria-label="项目导航"><a href="../index.html">项目首页</a><a href="../results/figures/cohort.html" id="cohort-link" data-carry-patient="true">患者与缺失值交互</a><a href="../results/figures/scales.html" id="pca-link" data-carry-patient="true">尺度与 PCA 交互</a><a href="../reanalysis/missing_data.html">分析与数据</a><a href="../presentation/deck.html">项目演示</a></nav><!-- /project-navigation -->
 <header>
 <div class="by"><span lang="en">RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease</span> · DSC5002 · C61 第 65 组 · <a href="missing_data.html">400 人全队列分析</a></div>
 <h1>从肾脏指标到贫血与高血糖</h1>
@@ -54,7 +58,7 @@
 <li>白蛋白为有序等级，使用平均秩 Spearman 相关，按患者重抽 5,000 次取 95% 百分位区间。5 级单例另作敏感性检查。</li>
 <li>血红蛋白对 log₂（肌酐）拟合直线，斜率直接给出肌酐每翻倍的平均差。报告 HC3 异方差稳健标准误和 <i>t</i> 区间。主模型 <i>t</i>(196) = −6.32，<i>p</i> &lt; .001，<i>R</i>² = 0.261。年龄调整和暂时排除最高肌酐值用于检查结果稳定性。<a href="clinical_tables/anemia_diagnostics.csv">模型诊断</a></li>
 <li>随机血糖的实测比例使用 Wilson 区间。把 24 字段完整的患者单独分析时，记录无糖尿病组为 3/15，记录有糖尿病组为 17/28。对计数较少或缺测较多的组，保留分子、分母及不确定性。</li>
-<li>这些问题是在原课程分析后形成的探索性问题。所有区间均为逐项 95% 区间。病因、治疗效果、随访进展和一般 CKD 人群患病率均超出这批记录可回答的范围。<a href="clinical_tables/clinical_metadata.csv">版本、种子及原始数据校验值</a> · <a href="../../README.md">复跑命令</a></li>
+<li>这些问题是在原课程分析后形成的探索性问题。所有区间均为逐项 95% 区间。病因、治疗效果、随访进展和一般 CKD 人群患病率均超出这批记录可回答的范围。<a href="clinical_tables/clinical_metadata.csv">版本、种子及原始数据校验值</a> · <a href="../development/SOURCE_MAP.md">复跑命令</a></li>
 </ul>
 </section>
 <footer>

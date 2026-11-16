@@ -20,6 +20,7 @@ dist/
 .coverage.*
 htmlcov/
 coverage.xml
+node_modules/
 
 # Jupyter autosaves; notebooks themselves remain tracked
 .ipynb_checkpoints/

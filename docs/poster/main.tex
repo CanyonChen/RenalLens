@@ -67,16 +67,16 @@
   \begin{alertblock}{How three missing-data rules select records}
     \centering
     \includegraphics[width=\linewidth]{figures/missing_data_paths.pdf}\par
-    {\small Across all CKD albumin grades, the albumin--creatinine correlation was $\rho=0.34$ for 197 measured pairs and $\rho=0.21$ for the 43 complete records. Imputation pooled both groups without using diagnosis labels.\par}
+    {\small Record~43's measured glucose survives both available-case analysis and imputation. Requiring all 24 fields discards it because one unrelated assessment is missing.\par}
   \end{alertblock}
 
   \begin{block}{Median creatinine fell overall and rose within CKD}
     \begin{figure}
       \centering
       \includegraphics[width=.98\linewidth]{figures/cohort_selection.pdf}
-      \caption{The creatinine medians use 383 measured and 158 complete records overall, and 238 measured and 43 complete records within CKD.}
+      \caption{Five-marker eligibility requires hemoglobin, creatinine, urea, glucose and blood pressure; right-hand percentages give CKD shares. The creatinine medians compare measured values with the all-24-field rule: 383 vs 158 records overall, and 238 vs 43 within CKD.}
     \end{figure}
-    Requiring all 24 fields retained \textbf{17.2\%} of CKD records (43/250) and \textbf{76.7\%} of non-CKD records (115/150). CKD's share of the sample fell from 62.5\% to 27.2\%. The overall median concealed the higher creatinine readings among the CKD patients who remained.
+    Requiring all 24 fields retained \textbf{158 records} (43 CKD, 115 non-CKD); requiring only the five markers retained \textbf{300} (165 CKD, 135 non-CKD). CKD's share was \textbf{27.2\% vs 55.0\%}, compared with 62.5\% originally. Under the 24-field rule, the overall median concealed higher creatinine among the CKD patients who remained.
   \end{block}
 \end{column}
 
@@ -107,14 +107,12 @@
 
 \begin{column}{\colwidth}
   \begin{exampleblock}{Which other grade-0 patients remained visible?}
-    Among \textbf{54 CKD records with urine albumin grade~0}, creatinine ranged from \textbf{0.6 to 24.0 mg/dL} in the 47 with a measurement. Figure~\ref{fig:grade-retention} follows the 45 with both anemia status and random glucose recorded.
-
-    Of those 45, \textbf{16 had anemia or random glucose $\geq$200 mg/dL}. Record~43 was one of two with both findings.
+    Of \textbf{54 CKD records with urine albumin grade~0}, 47 had measured creatinine (\textbf{0.6--24.0 mg/dL}). Among the 45 with known anemia status and glucose, \textbf{16 had anemia or glucose $\geq$200 mg/dL}; Record~43 was one of two with both.
 
     \begin{figure}
       \centering
       \includegraphics[width=.97\linewidth]{figures/grade_zero_selection.pdf}
-      \caption{Each position is the same patient in both panels. The ring marks Record~43. The 24-field rule excluded all 16 patients with a finding. The only patient retained had neither finding.}
+      \caption{Positions identify the same patients; the ring marks Record~43. All 16 with a finding were excluded. The only one of 45 retained had neither finding.}
       \label{fig:grade-retention}
     \end{figure}
   \end{exampleblock}
@@ -123,14 +121,14 @@
     \begin{figure}
       \centering
       \includegraphics[width=.98\linewidth]{figures/glucose_bounds.pdf}
-      \caption{High means random glucose $\geq$200 mg/dL. The shaded range runs from 72/250 to 110/250, depending on how many of the 38 missing readings were high. Each method uses the denominator printed beside it.}
+      \caption{High means random glucose $\geq$200 mg/dL. Assigning the 38 missing readings as low or high gives 72/250--110/250. Each method prints its own denominator.}
     \end{figure}
-    The 43 complete cases gave \textbf{46.5\%}, above the full-cohort upper bound of \textbf{44.0\%}. Filling the 38 missing readings with 121 mg/dL gave the lower bound of 28.8\%. The dataset has no treatment or follow-up outcomes.
+    Complete cases gave \textbf{46.5\%}, above the full-cohort maximum of \textbf{44.0\%}. Filling 38 gaps at 121 mg/dL gave 28.8\%. Treatment and follow-up outcomes were not recorded.
   \end{block}
 
   \begin{block}{Which tests dominate a five-marker summary?}
     {\centering\includegraphics[width=.98\linewidth]{figures/pca_scale.pdf}\par}
-    Each bar shows total variance in the same 400 imputed records. Glucose dominated the first principal component (PC1) in original units. After standardizing hemoglobin, creatinine, urea, glucose and blood pressure, the largest absolute weights belonged to urea, hemoglobin and creatinine.
+    Signed coefficients use the same 400 imputed records. Standardizing the five markers shifted PC1 from glucose dominance to urea, hemoglobin and creatinine; hemoglobin pointed in the opposite direction.
   \end{block}
 \end{column}
 

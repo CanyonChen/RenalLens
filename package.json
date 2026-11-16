@@ -1,0 +1,9 @@
+{
+  "name": "renallens-browser-checks",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check:browser": "node scripts/check_browser.cjs"
+  },
+  "devDependencies": { "playwright": "1.65.1" }
+}

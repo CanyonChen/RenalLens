@@ -1,44 +1,41 @@
 # RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease
 
-These eight slides form a seven-minute companion case study of Record 43 and the tests available for the CKD subgroup. The [course poster](../poster/RenalLens_Poster.pdf) presents the full 400-record comparison of missing-data strategies. [C61 presentation instructions](https://canvas.cityu.edu.hk/courses/70778/discussion_topics/644602)
+Eight slides, approximately seven minutes. The main presentation compares missing-data rules in the 400-record UCI CKD dataset. The earlier clinical companion is preserved as [case-study.html](case-study.html), with [its original notes](Case_study_notes.md).
 
-## 1 · What else would you look for? (0:40)
+## 1. One missing field, one excluded record (0:45)
 
-“Here are two entries from a real patient record. The patient already has a chronic kidney disease label. Their urine albumin score is zero, the lowest grade, and the diabetes history says no. If you could open the rest of the record, what would you look at next?” Pause before advancing. Leave the anemia and glucose results covered. This is record 43 in the original data, counting from one. We return to the same person at the end.
+Record 43 has a measured random glucose of 204 mg/dL and a CKD diagnosis. It has 23 of 24 explanatory fields recorded. Only rbc is missing. The all-24 complete-case rule removes the entire record, including that observed glucose result. Ask the audience what information a requirement for every field could remove. The project compares how those choices change the picture of the same 400 records. Record identifiers count from one after the CSV header. Source: original `data/raw/ckd.csv`.
 
-## 2 · Why these measurements? (1:00)
+## 2. Three rules, different denominators (0:55)
 
-“Think of the kidney as a filter. Albumin is a protein we usually want to keep in the blood. Creatinine is a waste product the kidneys clear. The urine test tells us about protein leakage. Blood creatinine gives us a clue to filtration. The kidneys also send a hormonal signal that helps the body make red blood cells. Hemoglobin carries oxygen inside those cells. Finally, high blood sugar over time can damage kidney blood vessels. A history of diabetes and a blood sugar reading answer different questions.” We studied the 250 CKD records among 400 patients. Each question uses the patients with the relevant fields recorded. [NIDDK on kidney tests](https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/tests-diagnosis) · [NIDDK on anemia](https://www.niddk.nih.gov/health-information/kidney-disease/anemia) · [NIDDK on diabetes and the kidney](https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/diabetic-kidney-disease)
+Observed measurements use the available values for each question, so the sample size depends on the feature or pair. Hemoglobin has 348 observed values, creatinine has 383, and the renal pair has 380. Complete cases require all 24 explanatory features and retain 158 records. Median and mode filling retains all 400 records. Numerical fields use the global observed median, categorical fields use the mode, and diagnosis never supplies the fill. Filled cells keep a provenance flag. The five displayed measurements are hemoglobin, creatinine, blood urea, glucose and blood pressure. Sources: `diagnostics.csv`, `renal_correlations.csv`, `eligibility_rules.csv` and the preprocessing rule.
 
-## 3 · What did grade zero tell us? (0:50)
+## 3. Eligibility changes the retained cohort (0:55)
 
-Point to the shaded grade-0 column. “Each mark represents one person. The diamond is record 43. Their blood creatinine measured 1.0 mg/dL. Yet the 47 people with this same urine grade had creatinine readings from 0.6 all the way to 24. Each step up the chart doubles the value. The horizontal lines are the middle values at each grade.” There were 197 pairs overall and only one at grade 5. The measure here is the dataset’s albumin grade on a scale from 0 to 5.
+The bars start from the same 400 records. All-24 retains 158 records: 43 CKD plus 115 non-CKD. Requiring only the five measurements retains 300: 165 CKD plus 135 non-CKD. This is a change in eligibility, with no imputation. CKD retention changes from 17.2% to 66.0%. Record 43 has all five measurements, so it enters the core-five cohort. Source: `eligibility_rules.csv`.
 
-## 4 · Why look at hemoglobin? (0:50)
+## 4. The creatinine shift reverses within CKD (0:55)
 
-“Urine albumin tells us about protein leakage. Blood creatinine gives a clue to filtration. Now look at what happens when we add a measure of oxygen-carrying capacity. Among 198 patients with both tests, those with twice the creatinine averaged about 0.90 units lower hemoglobin. The line describes this average. The points show how individual patients varied.” The interval was 0.62 to 1.18 units lower. An age-adjusted estimate in 192 patients was similar at 0.89 units lower. These are comparisons between patients measured once. UCI reports hemoglobin as “gms” without a volume denominator.
+Across all measured creatinine values, the median is 1.30 mg/dL. The all-24 median is 1.10. Within CKD, the median instead rises from 2.25 to 4.10. The group mix and the retained patients within each group both change. The CKD share among measured creatinine values falls from 62.1% to 27.2%. Read the plotted denominators aloud: they are the actual samples behind these medians. Sources: `median_shifts.csv`, `mixture_standardization.csv`.
 
-## 5 · What did a negative diabetes history tell us? (0:55)
+## 5. Median filling creates a visible concentration (0:55)
 
-“Return to the second entry on our opening card. A history marked no tells us what was recorded about diabetes. It still leaves today’s blood sugar to be measured. Among 87 people with a negative history and a glucose reading, 11 had random glucose at or above 200 mg/dL. Among 125 with a positive history and a reading, 61 reached that threshold.” The whiskers are 95% Wilson intervals. A further 26 people with negative history lacked a glucose result. Symptoms and confirmatory tests were unavailable. A single high reading here cannot establish a new diabetes diagnosis. [ADA diagnostic criteria, 2026](https://diabetesjournals.org/care/article/49/Supplement_1/S27/163926/2-Diagnosis-and-Classification-of-Diabetes)
+The ECDF is the share at or below each hemoglobin value. The teal curve uses 348 measured values. The burgundy curve uses all 400 records after filling. All 52 missing hemoglobin values receive 12.65, the observed global median. That produces a 13.0% jump at that value. The observed values stay unchanged. Filling keeps records in the analysis while imposing a visible distributional feature. UCI describes hemoglobin as gms without a volume denominator. Sources: `measurement_values.csv`, `diagnostics.csv`.
 
-## 6 · How often did findings overlap? (1:05)
+## 6. Pearson rises while rank correlation falls (1:00)
 
-“Count one mark for each of the 175 patients with all three findings recorded. We counted urine albumin grade 1 or above, an anemia entry marked yes, and glucose at or above 200. The filled squares identify 70 out of 175 people with two or more findings. Fifty-nine had exactly two and eleven had all three.” For the other 75 people at least one field was missing. Even with missing fields, nine of them had two confirmed positives. Therefore at least 79 of all 250 had two or more. If every unknown were positive, the largest possible total would be 122. Those limits are 31.6% and 48.8% of this sample.
+The raw axes show all renal pairs, including the extremes. Pearson compares linear co-variation on the numerical scale, while Spearman compares ranks. Overall Pearson rises from 0.586 to 0.896, but Spearman falls from 0.703 to 0.478. The retained cohort has a different diagnosis mix and extreme values influence the raw covariance. The within-group Pearson figures and leave-one-record calculation on the slide show why one overall coefficient is an incomplete description. Omitting observed record 22 changes Pearson to 0.674. This sensitivity calculation describes the observed pairs, rather than a deletion recommendation. Sources: `measurement_values.csv`, `renal_correlations.csv`, `diagnostics_renal_influence.csv`.
 
-## 7 · What appeared at grade zero? (0:50)
+## 7. Scaling changes the first principal component (0:55)
 
-“Now select the patients with the same albumin grade as record 43. We have anemia status and a glucose measurement for 45 of them. Follow the rows, one dot per patient. Twenty-nine had neither finding. Twelve had high glucose alone, and two had recorded anemia alone. Two had both. That makes 16 people with at least one additional finding.” Nine more people with grade 0 lacked a glucose reading. They are outside this figure. Ask the audience which row they think contains record 43, then turn to the last slide.
+Both PCAs use the same 400 filled records and five measurements. The chart reports signed eigenvector coefficients, specifically `eigenvector_weight`, rather than scaled loadings. With raw units, glucose dominates PC1. With z scores, blood urea and creatinine have larger positive coefficients and hemoglobin has a negative coefficient. Read PC1 and cumulative PC1-plus-PC2 explained variance from the chart. A whole component can change sign without changing the PCA geometry. Relative signs are what show opposing feature directions. Sources: `pca_loadings.csv`, `pca_variance.csv`.
 
-## 8 · Back to record 43 (0:50)
+## 8. Back to record 43 (0:40)
 
-“Open the rest of the record. The anemia field says yes, and hemoglobin was 9.7 in the units supplied by UCI. The diamond on the scale marks this patient’s random glucose of 204 mg/dL, just above our threshold of 200. Of the 45 grade-0 records with anemia status and glucose available, two had both findings. Record 43 is one of those two. Their urine score and diabetes history alone would have left both findings out of view.” The anemia observation comes directly from the recorded field. The single glucose value describes that measurement and does not establish a new diabetes diagnosis.
+Return to the observed 204 mg/dL glucose value. One unrelated missing field removes it under all-24 selection, whereas core-five eligibility keeps it. State the three conclusions on the slide: eligibility selects people, filling changes distributions, and the statistic and scale change the picture. Open the linked cohort explorer to show record 43, glucose and the complete-case view together.
 
-## Data and playback
+## Playback and reproduction
 
-The opening and closing use one observed patient, selected to illustrate co-occurrence. Cohort counts, uncertainty intervals and missing-data bounds come from the project tables. The HTML embeds the plotted data and logos. [UCI CKD dataset](https://doi.org/10.24432/C5G020) · [Patient measurements](../reanalysis/clinical_tables/patient_measurements.csv) · [Full result tables](../reanalysis/clinical_tables/)
+Open `deck.html` locally. Arrow keys or Space advance, G opens the slide list, F opens full screen, C toggles the counter, and 1-8 jump directly. The HTML embeds the CityU logo and all plotted SVG data, with no remote dependencies. The final link is relative to the repository and opens `../results/figures/cohort.html?patient=43&feature=bgr&view=complete_case`.
 
-Open `deck.html` locally. Use the arrow keys or Space to advance, **G** for the slide list, **F** for full screen, **C** for the page count, and **1–8** to jump. To export a vector PDF, use Chrome’s **Save as PDF** with background graphics enabled, no headers or footers, and the CSS page size (16:9).
-
-To recreate the thumbnails in PowerShell, set `$env:CHROME` to the full Chrome executable path and run `python render_preview.py deck.html 8 preview` from this directory. The script requires Pillow.
-
+Run `python scripts/build_presentation.py` from the repository root to regenerate the HTML and these notes from the published CSVs. Use `python scripts/build_presentation.py --render` to export the PDF, the contact sheet `preview.png`, eight full-size screenshots and a browser-check JSON record under `outputs/presentation/`. Rendering uses local Chrome and the project's Playwright dependency. Override the executable with `--chrome` or the `CHROME` environment variable.

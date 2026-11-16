@@ -16,21 +16,21 @@ GRID = "#DAD7DA"
 
 
 def composition():
-    counts = pd.read_csv(TABLES / "retention.csv").set_index("group")
-    fig, ax = plt.subplots(figsize=(2.95, 1.00))
+    counts = pd.read_csv(TABLES / "eligibility_rules.csv").set_index(["rule", "group"])
+    fig, ax = plt.subplots(figsize=(2.95, 1.22))
     fig.subplots_adjust(left=.29, right=.985, top=.95, bottom=.05)
-    for y, key, label in [(1, "n_total", "All records"), (0, "n_complete", "Complete")]:
-        n = counts[key].sum()
+    for y, rule, label in [(2, None, "All records"), (1, "core5", "5 markers"), (0, "all24", "24 fields")]:
+        n = 400 if rule is None else int(counts.at[(rule, "all"), "n_retained"])
         offset = 0
         for name, group, color in [("CKD", "ckd", BURGUNDY), ("Non-CKD", "notckd", "#ECE8EB")]:
-            count = counts.at[group, key]
+            count = int(counts.at[("all24", group), "n_original_group"] if rule is None else counts.at[(rule, group), "n_retained"])
             fraction = count / n
             ax.barh(y, fraction, left=offset, height=.70, color=color, edgecolor=INK, linewidth=.5)
             ax.text(offset + fraction / 2, y, f"{name}\n{count}", va="center", ha="center",
                     fontsize=7, color="white" if group == "ckd" else INK)
             offset += fraction
         ax.text(-.035, y, f"{label}\n(n={n})", va="center", ha="right", fontsize=7.1)
-    ax.set(xlim=(0, 1), ylim=(-.5, 1.5))
+    ax.set(xlim=(0, 1), ylim=(-.5, 2.5))
     ax.axis("off")
     return fig
 
@@ -140,7 +140,7 @@ def main():
              "axes.linewidth": .55, "axes.axisbelow": True, "axes.spines.top": False,
              "axes.spines.right": False, "text.color": INK, "axes.labelcolor": INK}
     charts = [
-        ("sample_composition", composition, (), "Diagnosis counts among all and complete records", "retention.csv"),
+        ("sample_composition", composition, (), "Diagnosis counts among all, five-marker and all-24-field complete records", "eligibility_rules.csv"),
         ("hemoglobin_ecdf", hemoglobin, (values,), "Hemoglobin distributions by missing-data rule", "measurement_values.csv"),
         ("glucose_threshold", glucose, (values,), "High glucose by rule and bounds for all CKD records", "measurement_values.csv"),
         ("renal_coefficients", renal_coefficients, (), "Creatinine and blood urea: estimated correlations and 95% bootstrap intervals", "renal_correlations.csv"),

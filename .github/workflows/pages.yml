@@ -1,0 +1,51 @@
+name: Build and publish RenalLens
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: renallens-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.7"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: uv sync --locked
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: uv run --locked python scripts/build.py --download --check --package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RenalLens-offline
+          path: outputs/RenalLens-offline.zip
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
