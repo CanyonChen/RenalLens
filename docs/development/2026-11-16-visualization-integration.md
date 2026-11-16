@@ -1,6 +1,6 @@
 # Visualization integration plan
 
-The project review and the user's follow-up approve the following implementation on branch `codex/visualization-integration`.
+The project review and the user's follow-up approve the following implementation on branch `zjj/visualization-integration`.
 
 ## Design
 
