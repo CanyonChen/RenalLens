@@ -11,7 +11,7 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 \IfFileExists{lmodern.sty}{\usepackage{lmodern}}{} % Vector Computer Modern family.
-\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[a4paper,top=1cm,bottom=1cm,left=1cm,right=1cm,marginparwidth=1.75cm]{geometry}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
@@ -21,13 +21,13 @@
 \usepackage{xcolor}
 \definecolor{cityuburgundy}{HTML}{941344}
 \usepackage[colorlinks=true,allcolors=cityuburgundy]{hyperref}
-\hypersetup{pdftitle={RenalLens: Reading Beyond Urine Albumin},
+\hypersetup{pdftitle={RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease},
   pdfauthor={City University of Hong Kong, DSC5002 C61 Group 65}}
 
 \title{
   \usefont{OT1}{bch}{b}{n}
-  \normalfont \normalsize \textsc{DSC5002 Project Report \enspace / \enspace C61 Group 65} \\ [10pt]
-  \huge RenalLens: Reading Beyond Urine Albumin
+  % \normalfont \normalsize \textsc{DSC5002 Project Report \enspace / \enspace C61 Group 65} \\ [10pt]
+  \huge RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease
 }
 \usepackage{authblk}
 \setlength{\affilsep}{0.5em}
@@ -37,13 +37,13 @@
 \author[1]{\protect\linebreak PENG Peiyan}
 \author[1]{ZHAI Junsong}
 \author[1]{ZHANG Junjie}
-\affil[1]{\small City University of Hong Kong}
-\date{November 15, 2026}
+\affil[1]{\small DSC5002-C61, Group 65}
+\date{}
 
-% Keep the cohort definition with the full-width title in the supplied template.
+% Keep the study question with the full-width title in the supplied template.
 \makeatletter
 \g@addto@macro\@maketitle{%
-  \noindent\textbf{Cohort.} We analyzed the 250 records labeled as chronic kidney disease in the 400-record \href{https://doi.org/10.24432/C5G020}{UCI dataset} (Rubini et al., 2015). We used available measurements to examine how serum creatinine varied across urine albumin grades and how often anemia or high random glucose occurred at grade~0.\par\vspace{7pt}}
+  \noindent\textbf{Abstract.} We compared three views of 400 \href{https://doi.org/10.24432/C5G020}{UCI records} (Rubini et al., 2015), including 250 CKD and 150 non-CKD. We used available measurements, records with all 24 features, or all records after imputation. Missing numeric values received the overall median and categories the mode, without using diagnosis.\par\vspace{7pt}}
 \makeatother
 
 \begin{document}
@@ -53,41 +53,43 @@
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\columnwidth]{figures/albumin_creatinine.pdf}
-  \caption{At urine albumin grade~0, serum creatinine ranged from 0.6 to 24.0~mg/dL (median 1.3). Across 197 pairs, Spearman's $\rho=0.34$ (95\% confidence interval [CI] 0.19--0.47, 5,000 paired bootstrap samples). Thin and thick lines show the full and interquartile ranges. Ticks mark medians.}
-  \label{fig:albumin}
+  \includegraphics[width=\columnwidth]{figures/sample_composition.pdf}
+  \caption{\textbf{Deleting incomplete records changes who is represented.} Bar widths show group shares. The CKD share fell from 62.5\% to 27.2\%. Red cell assessment (152/400 missing), red cell count (131/400) and white cell count (106/400) had the most gaps.}
 \end{figure}
+
+\noindent Median creatinine fell from 1.30 to 1.10~mg/dL overall, yet rose from 2.25 to 4.10 within CKD. The pooled decrease masks higher creatinine among the CKD patients who remained.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\columnwidth]{figures/creatinine_hemoglobin.pdf}
-  \caption{Mean hemoglobin was 0.90 units lower per doubling of serum creatinine across 198 records (95\% CI 0.62--1.18 lower). With age adjustment, the difference was 0.89 units lower ($n=192$). The band gives the pointwise 95\% CI for the fitted mean (HC3 standard errors). UCI lists hemoglobin in \textit{gms} without a volume denominator.}
-  \label{fig:hemoglobin}
+  \includegraphics[width=\columnwidth]{figures/hemoglobin_ecdf.pdf}
+  \caption{\textbf{Filling gaps creates a new pile-up.} No measured hemoglobin equaled 12.65. All 52 filled values landed there, creating a 13-point jump in the cumulative distribution. The interquartile range shrank from 4.70 to 3.75 source units.}
 \end{figure}
 
-\newpage % Start the metabolic findings in the second column.
+\newpage % Start the clinical interpretation in the second column.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/glucose_threshold.pdf}
+  \caption{\textbf{High glucose in CKD.} Filling 38 missing readings with 121~mg/dL placed all below 200. Counting none or all 38 as high gives 28.8--44.0\% among 250 patients. Complete cases alone exceed this upper bound (46.5\%).}
+\end{figure}
+
+\noindent\textbf{Record 43} had anemia and glucose of 204~mg/dL. Its missing red cell assessment excluded this high reading from complete cases. Follow-up outcomes were unavailable.
+
 \begin{table}[H]
   \centering
-  {\small\setlength{\tabcolsep}{3pt}
+  {\small\setlength{\tabcolsep}{2pt}
   \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrr@{}}
   \hline
-  History & High / tested & Missing & \% (95\% CI)\\
+  Data used & Pairs & Pearson $r$ & Spearman $\rho$\\
   \hline
-  No  & 11/87  & 26 & 12.6 (7.2--21.2)\\
-  Yes & 61/125 & 12 & 48.8 (40.2--57.5)\\
+  Available & 380 & 0.586 & 0.703\\
+  Complete & 158 & 0.896 & 0.478\\
+  Imputed & 400 & 0.582 & 0.696\\
   \hline
   \end{tabular*}}
-  \caption{Random glucose $\geq 200$~mg/dL by recorded diabetes history ($n=212$ tested). The proportion was 36.2 percentage points higher in those with a diabetes history (Newcombe 95\% CI 24.0--46.4). Rows give Wilson intervals.}
-  \label{tab:glucose}
+  \caption{\textbf{Creatinine and blood urea.} Deletion strengthened linear correlation and weakened rank correlation.}
 \end{table}
+\noindent Creatinine skewness fell from 7.51 to 1.03 on a natural-log scale ($n=383$). Omitting the 76~mg/dL maximum raises available-pair $r$ to 0.674.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/patient_overlap.pdf}
-  \caption{Overlap of albumin grade~$\geq 1$, recorded anemia and high random glucose. (A) Cells give counts and within-group percentages. At grade~0, 16/45 (35.6\%) had anemia, high glucose or both. (B) Of 175 records with all three results, 70 had at least two findings. Counting missing findings as absent or present gives a range of 79--122 of 250.}
-  \label{fig:overlap}
-\end{figure}
-
-\noindent{\footnotesize \href{https://github.com/CanyonChen/RenalLens}{Analysis code and statistical tables}. Analysis and figures used \href{https://arxiv.org/abs/2609.00065}{Scientific Agent Skills} (Kassis et al., 2026).}
+\smallskip
+% \noindent{\footnotesize \href{https://github.com/CanyonChen/RenalLens/tree/main/docs/reanalysis/tables}{Analysis tables} and \href{https://github.com/CanyonChen/RenalLens/blob/main/docs/reanalysis/missing_data.html}{methods supplement}. Figures used \href{https://doi.org/10.48550/arXiv.2609.00065}{Scientific Agent Skills} (Kassis et al., 2026).}
 \end{document}
-

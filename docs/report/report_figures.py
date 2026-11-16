@@ -1,146 +1,112 @@
-"""Draw the cohort report figures from the CKD measurements and fitted model."""
-
+"""Render vector figures for the one-page CKD report using the published analysis tables."""
 from pathlib import Path
 
 import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
 import numpy as np
 import pandas as pd
-from matplotlib.ticker import NullLocator
+
 
 REPORT = Path(__file__).resolve().parent
-TABLES = REPORT.parent / "reanalysis" / "clinical_tables"
-ACCENT = "#941344"
-INK = "#292529"
-GRAY = "#716A70"
-GRID = "#E3DFE1"
+TABLES = REPORT.parent / "reanalysis" / "tables"
+BURGUNDY, TEAL, INK = "#941344", "#156368", "#27242A"
+GRID = "#DAD7DA"
 
 
-def style_axes(ax, grid_axis="y"):
-    ax.spines[["top", "right"]].set_visible(False)
-    ax.spines[["left", "bottom"]].set_color(GRAY)
-    ax.grid(axis=grid_axis, color=GRID, linewidth=0.65)
-    ax.set_axisbelow(True)
-    ax.tick_params(color=GRAY, length=2.5)
+def composition():
+    counts = pd.read_csv(TABLES / "retention.csv").set_index("group")
+    fig, ax = plt.subplots(figsize=(2.95, 1.00))
+    fig.subplots_adjust(left=.29, right=.985, top=.95, bottom=.05)
+    for y, key, label in [(1, "n_total", "All records"), (0, "n_complete", "Complete")]:
+        n = counts[key].sum()
+        offset = 0
+        for name, group, color in [("CKD", "ckd", BURGUNDY), ("Non-CKD", "notckd", "#ECE8EB")]:
+            count = counts.at[group, key]
+            fraction = count / n
+            ax.barh(y, fraction, left=offset, height=.70, color=color, edgecolor=INK, linewidth=.5)
+            ax.text(offset + fraction / 2, y, f"{name}\n{count}", va="center", ha="center",
+                    fontsize=7, color="white" if group == "ckd" else INK)
+            offset += fraction
+        ax.text(-.035, y, f"{label}\n(n={n})", va="center", ha="right", fontsize=7.1)
+    ax.set(xlim=(0, 1), ylim=(-.5, 1.5))
+    ax.axis("off")
+    return fig
 
 
-def set_doubling_axis(axis, ticks):
-    axis.set_ticks(ticks, labels=[f"{x:g}" for x in ticks])
-    axis.set_minor_locator(NullLocator())
+def hemoglobin(values):
+    hb = values[values.feature.eq("hemo")]
+    fig, ax = plt.subplots(figsize=(2.95, 1.76))
+    fig.subplots_adjust(left=.20, right=.98, bottom=.24, top=.96)
+    series = [
+        ("Available", hb.observed.dropna(), INK, "-"),
+        ("Complete", hb.loc[hb.complete_case, "observed"], BURGUNDY, "--"),
+        ("Imputed", hb.imputed, TEAL, ":"),
+    ]
+    for label, data, color, linestyle in series:
+        unique, counts = np.unique(data, return_counts=True)
+        ax.step(np.r_[unique[0], unique], np.r_[0, counts.cumsum()/len(data)], where="post",
+                lw=1.5, color=color, linestyle=linestyle, label=f"{label} ({len(data)})")
+    median = hb.observed.median()
+    at_median = hb.observed.isna()
+    low = hb.imputed.lt(median - 1e-6).mean()
+    high = hb.imputed.le(median + 1e-6).mean()
+    ax.annotate(f"{at_median.sum()} filled\nat {median:.2f}", (median, (low + high)/2),
+                xytext=(14.35, .24), ha="left", va="center", color=TEAL, fontsize=7.1,
+                arrowprops={"arrowstyle": "-", "lw": .65, "color": TEAL})
+    ax.set(xlabel="Hemoglobin (UCI source units)", ylabel="Cumulative share",
+           xlim=(2.5, 18.5), xticks=[4, 8, 12, 16], ylim=(-.015, 1.04), yticks=[0, .5, 1])
+    ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
+    ax.grid(axis="y", color=GRID, lw=.5)
+    ax.legend(loc="upper left", frameon=False, fontsize=6.5, handlelength=2, borderpad=0)
+    return fig
 
 
-def albumin_creatinine(records):
-    paired = records.dropna(subset=["al", "sc"])
-    grade = paired.groupby("al").sc
-    fig, ax = plt.subplots(figsize=(3.02, 1.76), layout="constrained")
-    ax.axhspan(-0.38, 0.38, color="#F9EEF2", zorder=0)
-    for level, values in grade:
-        color = ACCENT if level == 0 else GRAY
-        q1, median, q3 = values.quantile([0.25, 0.5, 0.75])
-        ax.hlines(level, values.min(), values.max(), color=color, linewidth=1.1)
-        ax.scatter([values.min(), values.max()], [level, level], marker="|",
-                   s=27, color=color, linewidths=1)
-        ax.hlines(level, q1, q3, color=color, linewidth=4, zorder=2)
-        ax.scatter(median, level, marker="|", s=35, color=INK, linewidths=1.7, zorder=3)
-    ax.set_xscale("log", base=2)
-    set_doubling_axis(ax.xaxis, [0.5, 1, 2, 4, 8, 16, 32])
-    ax.set_xlim(0.45, 36)
-    ax.set_ylim(5.45, -0.5)
-    ax.set_yticks(grade.size().index,
-                  labels=[f"Grade {int(i)}  (n={n})" for i, n in grade.size().items()])
-    ax.set_xlabel(r"Serum creatinine (mg/dL, $\log_2$ scale)")
-    style_axes(ax, grid_axis="x")
-    ax.spines["left"].set_visible(False)
+def glucose(values):
+    ckd = values[values.feature.eq("bgr") & values.group.eq("ckd")]
+    groups = [(ckd.observed.dropna(), "o", INK), (ckd.loc[ckd.complete_case, "observed"], "s", BURGUNDY),
+              (ckd.imputed, "D", TEAL)]
+    fig, ax = plt.subplots(figsize=(2.95, 1.48))
+    fig.subplots_adjust(left=.27, right=.98, top=.96, bottom=.31)
+    for y, (readings, marker, color) in zip([3, 2, 1], groups, strict=True):
+        high = readings.ge(200).sum()
+        pct = 100 * high / len(readings)
+        ax.plot(pct, y, marker=marker, ms=5, color=color)
+        ax.annotate(f"{high}/{len(readings)}", (pct, y), xytext=(5, 0),
+                    textcoords="offset points", va="center", fontsize=7)
+    high = ckd.observed.ge(200).sum()
+    missing = ckd.observed.isna().sum()
+    bounds = 100 * np.array([high, high + missing]) / len(ckd)
+    ax.hlines(0, *bounds, color=INK, linewidth=1.6)
+    ax.plot(bounds, [0, 0], "|", color=INK, markersize=7)
+    ax.set(xlim=(0, 61), xticks=[0, 20, 40, 60], ylim=(-.5, 3.5),
+           yticks=[3, 2, 1, 0], yticklabels=["Available", "Complete", "Imputed", "All possible"],
+           xlabel="Share with random glucose ≥200 mg/dL")
+    ax.xaxis.set_major_formatter(PercentFormatter(100, decimals=0))
     ax.tick_params(axis="y", length=0)
-    return fig
-
-
-def creatinine_hemoglobin(records):
-    paired = records.dropna(subset=["sc", "hemo"])
-    fit = pd.read_csv(TABLES / "anemia_fit.csv")
-    fig, ax = plt.subplots(figsize=(3.02, 1.80), layout="constrained")
-    ax.scatter(paired.sc, paired.hemo, s=7, facecolors="white", edgecolors=GRAY,
-               linewidths=0.45, zorder=2)
-    ax.fill_between(fit.sc, fit.ci_low, fit.ci_high, color="#F1D4DE", zorder=1)
-    ax.plot(fit.sc, fit.mean_hemo, color=ACCENT, linewidth=1.8, zorder=3)
-    ax.set_xscale("log", base=2)
-    set_doubling_axis(ax.xaxis, [0.5, 1, 2, 4, 8, 16, 32, 64])
-    ax.set_xlim(0.43, 91)
-    ax.set_yticks([3, 6, 9, 12, 15])
-    ax.set_xlabel(r"Serum creatinine (mg/dL, $\log_2$ scale)")
-    ax.set_ylabel("Hemoglobin (source units)")
-    style_axes(ax)
-    return fig
-
-
-def patient_overlap(records):
-    complete = records.dropna(subset=["al_positive", "anemia", "high_glucose"])
-    states = [(0, 0), (0, 1), (1, 0), (1, 1)]
-    labels = ["Neither finding", "High glucose only", "Anemia only", "Both findings"]
-    counts = pd.crosstab([complete.anemia, complete.high_glucose], complete.al_positive)
-    counts = counts.reindex(index=states, columns=[0, 1], fill_value=0)
-    totals = counts.sum()
-    shares = counts.div(totals)
-
-    fig = plt.figure(figsize=(3.02, 2.87))
-    title = {"fontsize": 8.4, "fontweight": "bold", "va": "top"}
-    fig.text(0.015, 0.99, "A   Anemia and glucose by albumin grade", **title)
-    ax = fig.add_axes([0.38, 0.48, 0.60, 0.32])
-    shades = mpl.colors.LinearSegmentedColormap.from_list("burgundy", ["#FCF8F9", "#C788A0"])
-    ax.imshow(shares, cmap=shades, vmin=0, vmax=1, aspect="auto", interpolation="nearest")
-    for row in range(len(states)):
-        for col in range(len(totals)):
-            ax.text(col, row, f"{counts.iat[row, col]} ({shares.iat[row, col]:.1%})",
-                    ha="center", va="center", fontsize=7.8)
-    ax.set_xticks([0, 1], [f"Grade 0\n(n={totals[0]})", f"Grades 1–5\n(n={totals[1]})"])
-    ax.set_yticks(range(len(labels)), labels)
-    ax.xaxis.tick_top()
-    ax.set_xticks([0.5], minor=True)
-    ax.set_yticks(np.arange(0.5, len(labels) - 1), minor=True)
-    ax.grid(which="minor", color="white", linewidth=1.3)
-    ax.tick_params(which="both", length=0)
-    ax.spines[:].set_visible(False)
-
-    fig.text(0.015, 0.42, "B   Records with at least two findings", **title)
-    overall = fig.add_axes([0.28, 0.14, 0.67, 0.20])
-    observed = 100 * (complete.min_signals >= 2).mean()
-    lower = 100 * (records.min_signals >= 2).mean()
-    upper = 100 * (records.max_signals >= 2).mean()
-    overall.scatter(observed, 1, facecolor=ACCENT, edgecolor=ACCENT, s=21, zorder=3)
-    overall.text(observed + 3, 1, f"{observed:.1f}%", va="center", fontsize=7.6)
-    overall.hlines(0, lower, upper, color=GRAY, linewidth=3)
-    overall.scatter([lower, upper], [0, 0], marker="|", color=GRAY, s=55)
-    overall.text(upper + 4, 0, f"{lower:.1f}–{upper:.1f}%", va="center", fontsize=7.5)
-    overall.set_yticks([0, 1], [f"Full cohort\n(n={len(records)})", f"All 3 known\n(n={len(complete)})"])
-    overall.set_ylim(-0.6, 1.6)
-    overall.set_xlim(0, 100)
-    overall.set_xticks([0, 25, 50, 75, 100])
-    overall.set_xlabel("Share of records (%)")
-    style_axes(overall, grid_axis="x")
-    overall.spines["left"].set_visible(False)
-    overall.tick_params(axis="y", length=0)
+    ax.spines["left"].set_visible(False)
+    ax.grid(axis="x", color=GRID, lw=.5)
     return fig
 
 
 def main():
-    records = pd.read_csv(TABLES / "patient_measurements.csv")
-    output = REPORT / "figures"
-    output.mkdir(exist_ok=True)
-    style = {"font.size": 7.7, "font.family": "DejaVu Sans", "text.color": INK,
-             "axes.labelcolor": INK, "xtick.color": INK, "ytick.color": INK,
-             "axes.linewidth": 0.65, "pdf.fonttype": 42}
+    values = pd.read_csv(TABLES / "measurement_values.csv")
+    style = {"font.family": "DejaVu Sans", "font.size": 7.4, "pdf.fonttype": 42,
+             "axes.linewidth": .55, "axes.axisbelow": True, "axes.spines.top": False,
+             "axes.spines.right": False, "text.color": INK, "axes.labelcolor": INK}
     charts = [
-        (albumin_creatinine, "Serum creatinine across urine albumin grades"),
-        (creatinine_hemoglobin, "Hemoglobin across serum creatinine measurements"),
-        (patient_overlap, "Anemia and high glucose by urine albumin grade and full-cohort bounds"),
+        ("sample_composition", composition, (), "Diagnosis counts among all and complete records", "retention.csv"),
+        ("hemoglobin_ecdf", hemoglobin, (values,), "Hemoglobin distributions by missing-data rule", "measurement_values.csv"),
+        ("glucose_threshold", glucose, (values,), "High glucose by rule and bounds for all CKD records", "measurement_values.csv"),
     ]
     with mpl.rc_context(style):
-        for chart, title in charts:
-            fig = chart(records)
-            fig.savefig(output / f"{chart.__name__}.pdf",
-                        metadata={"Title": title, "CreationDate": None})
-            plt.close(fig)
+        for name, draw, args, title, source in charts:
+            figure = draw(*args)
+            figure.savefig(REPORT / "figures" / f"{name}.pdf", facecolor="white",
+                           metadata={"Title": title, "Subject": f"UCI CKD | docs/reanalysis/tables/{source}",
+                                     "CreationDate": None})
+            plt.close(figure)
 
 
 if __name__ == "__main__":

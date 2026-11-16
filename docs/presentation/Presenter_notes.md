@@ -1,6 +1,6 @@
-# RenalLens: Reading Beyond Urine Albumin
+# RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease
 
-Eight slides, seven minutes. The C61 group presentation uses the uploaded poster on the classroom computer. The deck can be used for rehearsal. [C61 presentation instructions](https://canvas.cityu.edu.hk/courses/70778/discussion_topics/644602)
+These eight slides form a seven-minute companion case study of Record 43 and the tests available for the CKD subgroup. The [course poster](../poster/RenalLens_Poster.pdf) presents the full 400-record comparison of missing-data strategies. [C61 presentation instructions](https://canvas.cityu.edu.hk/courses/70778/discussion_topics/644602)
 
 ## 1 · What else would you look for? (0:40)
 

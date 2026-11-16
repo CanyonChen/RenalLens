@@ -2,11 +2,11 @@
 <html lang="zh-Hans">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RenalLens: Reading Beyond Urine Albumin｜中文临床分析</title>
+<title>RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease｜CKD 病例专题</title>
 <link rel="stylesheet" href="report.css">
 </head><body><main>
 <header>
-<div class="by"><span lang="en">RenalLens: Reading Beyond Urine Albumin</span> · DSC5002 · C61 第 65 组 · 2026 年 11 月 15 日</div>
+<div class="by"><span lang="en">RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease</span> · DSC5002 · C61 第 65 组 · <a href="missing_data.html">400 人全队列分析</a></div>
 <h1>从肾脏指标到贫血与高血糖</h1>
 <p class="lead">第 43 号慢性肾病（CKD）病历中，尿白蛋白是最低的 0 级，病史明确记录无糖尿病。血检还能告诉我们什么？在 UCI 标记为 CKD 的 250 份记录中，我们先看肾脏如何保留蛋白和清除废物，再看血液运氧与血糖，最后回到这位患者。</p>
 <nav aria-label="研究问题"><a href="#kidney">白蛋白与肌酐</a><a href="#hemoglobin">血红蛋白</a><a href="#glucose">高血糖</a><a href="#overlap">同一患者</a><a href="#methods">数据与方法</a></nav>
@@ -49,7 +49,7 @@
 </section>
 <section id="methods">
 <h2>研究范围与复核</h2>
-<p>UCI CKD 数据集共 400 条记录。本分析纳入全部 250 条标记为 CKD 的记录，采用横断面设计，每行作为一名患者的记录处理。数据没有可核对不同就诊是否属于同一人的持续身份标识。主分析按每题所需字段选取实测值；若一律要求 24 个解释变量齐全，CKD 患者只剩 43 人。本项目把缺失、异常读数和完整病例分析用作敏感性检查。<a href="clinical_tables/availability.csv">各题可用人数</a> · <a href="missing_data.html">400 人缺失值与尺度分析附录</a></p>
+<p>UCI CKD 数据集共 400 条记录。病例专题纳入全部 250 条标记为 CKD 的记录，采用横断面设计，每行作为一名患者的记录处理。数据没有可核对不同就诊是否属于同一人的持续身份标识。各题按所需字段选取实测值；若一律要求 24 个解释变量齐全，CKD 患者只剩 43 人。<a href="clinical_tables/availability.csv">各题可用人数</a> · <a href="missing_data.html">400 人缺失值与尺度分析</a></p>
 <ul>
 <li>白蛋白为有序等级，使用平均秩 Spearman 相关，按患者重抽 5,000 次取 95% 百分位区间。5 级单例另作敏感性检查。</li>
 <li>血红蛋白对 log₂（肌酐）拟合直线，斜率直接给出肌酐每翻倍的平均差。报告 HC3 异方差稳健标准误和 <i>t</i> 区间。主模型 <i>t</i>(196) = −6.32，<i>p</i> &lt; .001，<i>R</i>² = 0.261。年龄调整和暂时排除最高肌酐值用于检查结果稳定性。<a href="clinical_tables/anemia_diagnostics.csv">模型诊断</a></li>

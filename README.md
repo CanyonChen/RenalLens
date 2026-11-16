@@ -1,18 +1,27 @@
-# RenalLens: Reading Beyond Urine Albumin
+# RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease
 
-**What can a blood test add to a urine result in chronic kidney disease?**\
-**一份尿检之外，血液检查还能告诉我们什么？**
+**Which patients and findings are visible when we keep, delete or fill incomplete records?**\
+**逐项使用实测值、整行删除或填补缺失后，我们看到的是哪些患者和哪些异常？**
 
 City University of Hong Kong · DSC5002 Exploratory Data Analysis and Visualization · C61, Group 65
 
-[Report / 报告](docs/report/RenalLens_Report.pdf) · [Poster / 海报](docs/poster/RenalLens_Poster.pdf) · [Slides / 离线演示](docs/presentation/deck.html) · [Slides PDF](docs/presentation/RenalLens_Presentation.pdf) · [Speaker notes / 讲稿](docs/presentation/Presenter_notes.md)
+[Report / 报告](docs/report/RenalLens_Report.pdf) · [Poster / 海报](docs/poster/RenalLens_Poster.pdf) · [Full analysis / 全队列分析](docs/reanalysis/missing_data.html) · [Case-study slides / 病例专题演示](docs/presentation/deck.html) · [Slides PDF](docs/presentation/RenalLens_Presentation.pdf) · [Case-study speaker notes / 病例讲稿](docs/presentation/Presenter_notes.md)
 
 | LaTeX | Project source / 项目源码 | Original template / 原始模板 |
 | --- | --- | --- |
 | Report / 报告 | [main.tex](docs/report/main.tex) | [report_template](docs/report/report_template/) |
 | Poster / 海报 | [main.tex](docs/poster/main.tex) | [poster_template](docs/poster/poster_template/) |
 
-## Record 43 / 第 43 号病历
+## What changes across the 400 records? / 400 份记录中的比较
+
+Requiring all 24 features retained 43 of 250 CKD records and 115 of 150 non-CKD records. The CKD share fell from **62.5% to 27.2%**. Among CKD records, random glucose reached 200 mg/dL in **72/212 (34.0%)** with a measurement and **20/43 (46.5%)** with all features present. Filling the 38 missing glucose values with the overall median of 121 mg/dL gave **72/250 (28.8%)**. Record 43 shows the consequence for one patient record. Its glucose of 204 mg/dL and recorded anemia disappear from the complete-case analysis because the red cell assessment is missing. [Composition, distributions and correlations](docs/reanalysis/missing_data.html)
+
+要求 24 项齐全后，CKD 组留下 43/250 人，非 CKD 组留下 115/150 人，CKD 样本占比从 **62.5% 降至 27.2%**。在 CKD 组，随机血糖达到 200 mg/dL 的比例按实测、完整病例和中位数填补分别为 **34.0%、46.5% 和 28.8%**。这三种口径改变了能观察到哪些患者及其异常。第 43 号病历中已有贫血记录和 204 mg/dL 的血糖读数，但因缺少红细胞评估，两项已知结果都随整行删除退出分析。
+
+<details>
+<summary>Companion case study / 第 43 号病历专题</summary>
+
+### Record 43 / 第 43 号病历
 
 Record 43 carries a chronic kidney disease (CKD) label. Its urine albumin grade was **0**, the lowest grade in the dataset, and its diabetes history was recorded as **no**. What else would we learn by reading this patient's blood tests? We asked the same question of all **250 CKD records** in the 400-record UCI dataset. “43” is the original data row, counting from one after the header. [Patient measurements](docs/reanalysis/clinical_tables/patient_measurements.csv)
 
@@ -42,10 +51,12 @@ In record 43, serum creatinine was **1.0 mg/dL**, hemoglobin was **9.7** in the 
 
 ![One mark per grade-0 patient. A ring identifies record 43 among two diamonds denoting both recorded anemia and high glucose. 每个符号代表一人，圆环标出第 43 号。](docs/reanalysis/clinical_figures/patient_overlap.svg)
 
+</details>
+
 ## Analysis files / 分析资料
 
-- Clinical findings / 临床分析：[中文分析报告](docs/reanalysis/index.html) · [Result tables](docs/reanalysis/clinical_tables/) · [Figures](docs/reanalysis/clinical_figures/)
-- Missing-data supplement / 缺失数据附录：[Methods and sensitivity analysis](docs/reanalysis/missing_data.html) · [Tables](docs/reanalysis/tables/) · [Figures](docs/reanalysis/figures/)
+- Full-cohort missing-data analysis / 缺失值处理与全队列结果：[Methods and sensitivity analysis](docs/reanalysis/missing_data.html) · [Tables](docs/reanalysis/tables/) · [Figures](docs/reanalysis/figures/)
+- CKD case study / CKD 病例专题：[中文病例分析](docs/reanalysis/index.html) · [Result tables](docs/reanalysis/clinical_tables/) · [Figures](docs/reanalysis/clinical_figures/)
 - Earlier exploratory work / 前期探索：[Clinical strata](docs/clinical_report.html) · [Cohort comparisons](docs/results/figures/cohort.html) · [Scale and PCA](docs/results/figures/scales.html) · [Processing audit](docs/results/preprocessing_audit.json)
 - Original proposal / 原始提案：[Bilingual text](docs/proposal.md) · [PDF](docs/DSC5002_CKD_Proposal.pdf)
 
@@ -58,9 +69,9 @@ uv run --locked python scripts/clinical_questions.py
 uv run --locked python scripts/clinical_question_figures.py
 ```
 
-The following commands reproduce the 400-record methods supplement. Its default random seed is `20261115`. Bootstrap intervals use 5,000 patient resamples within diagnosis. The validation splits the patients into five folds.
+The following commands reproduce the 400-record missing-data analysis. Its default random seed is `20261115`. Bootstrap intervals use 5,000 patient resamples within diagnosis. The validation splits the patients into five folds.
 
-临床主分析的原始数据校验值、软件版本和病例计数规则见[临床运行记录](docs/reanalysis/clinical_tables/clinical_metadata.csv)。下列命令在仓库根目录复现 400 人的方法学附录。附录另有[运行记录](docs/reanalysis/tables/analysis_metadata.csv)和[五折填补结果](docs/reanalysis/tables/imputation_folds.csv)。
+病例专题的原始数据校验值、软件版本和病例计数规则见[临床运行记录](docs/reanalysis/clinical_tables/clinical_metadata.csv)。下列命令在仓库根目录复现 400 人的缺失数据分析。详见[运行记录](docs/reanalysis/tables/analysis_metadata.csv)和[五折填补结果](docs/reanalysis/tables/imputation_folds.csv)。
 
 ```sh
 uv run --locked python scripts/statistical_reanalysis.py
@@ -79,7 +90,7 @@ We use the public [Chronic Kidney Disease dataset from the UCI Machine Learning 
 | --- | --- |
 | Size / 规模 | 400 patient records; 24 explanatory variables and one class label / 400 条患者记录，24 个解释变量和 1 个类别标签 |
 | Groups / 分组 | 250 CKD and 150 non-CKD records / CKD 组 250 条，非 CKD 组 150 条 |
-| Clinical fields / 主分析字段 | Urine albumin grade (`al`), serum creatinine (`sc`), hemoglobin (`hemo`), recorded anemia (`ane`), random blood glucose (`bgr`), diabetes history (`dm`) / 尿白蛋白等级、血肌酐、血红蛋白、贫血记录、随机血糖、糖尿病史 |
+| Core measurements / 主分析指标 | Hemoglobin (`hemo`), serum creatinine (`sc`), blood urea (`bu`), random blood glucose (`bgr`), blood pressure (`bp`) / 血红蛋白、血肌酐、血尿素、随机血糖、血压 |
 | Data-quality issues / 数据质量问题 | Missing entries, inconsistent whitespace, coded categories, and different measurement scales / 缺失项、空白字符不一致、类别编码和测量尺度差异 |
 | Data license / 数据许可 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), as stated by UCI / 依 UCI 页面标注，采用 CC BY 4.0 许可 |
 
@@ -87,10 +98,10 @@ The full run confirmed the preliminary counts in the proposal. Requiring all 24 
 
 全量运行复核了提案中的样本数。要求全部 24 项特征齐全后，保留 **158 条记录（CKD 43 条，非 CKD 115 条）**，CKD 样本占比从 **62.5% 降至 27.2%**。这些比例的分母是本研究样本。[患者去留与缺失矩阵](docs/clinical_report.html#selection)
 
-## Methods supplement / 方法学附录
+## Full-cohort methods / 全队列分析方法
 
 <details>
-<summary>Earlier 400-record analysis of sample selection, missing values and scale / 展开 400 人样本的缺失值与尺度分析</summary>
+<summary>Sample selection, missing values and scale in 400 records / 展开 400 人样本的缺失值与尺度分析</summary>
 
 ### Three data views / 三种数据视角
 
@@ -171,7 +182,7 @@ RenalLens/
 │   ├── report/               # LaTeX report and PDF / 报告
 │   ├── poster/               # LaTeX poster and PDF / 海报
 │   ├── presentation/         # Offline deck, PDF and speaking notes / 演示与讲稿
-│   └── reanalysis/           # Clinical tables, figures and methods supplement / 主分析与附录
+│   └── reanalysis/           # Full-cohort analysis and CKD case study / 全队列分析与病例专题
 ├── scripts/
 │   ├── clinical_questions.py  # Measured pairs, overlap and missing-data bounds / 临床结果和缺失界限
 │   ├── clinical_question_figures.py  # Charts from the clinical tables / 临床结果图

@@ -1,3 +1,4 @@
+% !LW recipe = latexmk (xelatex)
 % RenalLens, adapted from poster_template/main.tex (UChicago CS / Gemini v1.1.0).
 % In this directory: xelatex -jobname=RenalLens_Poster main.tex
 % bibtex RenalLens_Poster ; then run the same XeLaTeX command twice.
@@ -33,10 +34,10 @@
 \setlength{\colwidth}{0.3\paperwidth}
 \newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
 
-\title{RenalLens: Reading Beyond Urine Albumin}
+\title{RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease}
 \author{BAI Yingdong \and CHEN Canyang \and LI Jiaheng \and PENG Peiyan \and ZHAI Junsong \and ZHANG Junjie}
-\institute[CityUHK]{City University of Hong Kong}
-\hypersetup{pdftitle={RenalLens: Reading Beyond Urine Albumin},
+\institute[CityUHK]{DSC5002-C61, Group 65}
+\hypersetup{pdftitle={RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease},
   pdfauthor={BAI Yingdong, CHEN Canyang, LI Jiaheng, PENG Peiyan, ZHAI Junsong, ZHANG Junjie},
   pdfsubject={DSC5002 RenalLens group project}}
 \footercontent{
@@ -58,92 +59,94 @@
 \separatorcolumn
 
 \begin{column}{\colwidth}
-  \begin{block}{What could the urine test miss in Record 43?}
-    This patient had chronic kidney disease (CKD), urine albumin grade~0 and no recorded history of diabetes. \textbf{Could anemia or high blood sugar still be present?}
-
-    Albumin is a blood protein that can leak into urine when kidney filters are damaged. Grade~0 is the lowest recorded grade. Creatinine is a waste product that the kidneys clear from the blood \citep{kidneytests}.
+  \begin{block}{One missing field excluded Record 43}
+    Among 400 UCI patient records, 250 carried a chronic kidney disease (CKD) label \citep{uci}. Record~43 had documented anemia, urine albumin grade~0 (the lowest recorded grade) and random glucose of \textbf{204 mg/dL}. Its only missing field was the red blood cell assessment. Requiring all 24 fields removed this patient and all three known results from the analysis.
 
     \begin{figure}
       \centering
-      \includegraphics[width=.96\linewidth]{figures/albumin_range.pdf}
-      \caption{Each dot represents one of 47 grade-0 patients with a creatinine measurement. The diamond marks Record~43.}
+      \includegraphics[width=.97\linewidth]{figures/cohort_selection.pdf}
+      \caption{Panel B counts patients. Requiring all 24 explanatory fields retained 43/250 CKD records (17.2\%) and 115/150 non-CKD records (76.7\%).}
     \end{figure}
   \end{block}
 
-  \begin{block}{How much did creatinine vary?}
-    \begin{itemize}
-      \item At grade~0, creatinine ranged from \textbf{0.6 to 24.0 mg/dL}. Record~43 measured \textbf{1.0 mg/dL}.
-      \item Among 197 patients with both tests, median creatinine was \textbf{1.30 mg/dL} at grade~0 and \textbf{4.05 mg/dL} at grade~4.
-    \end{itemize}
+  \begin{block}{The changing sample reversed the apparent shift}
+    CKD accounted for \textbf{62.5\% of all 400 records} and \textbf{27.2\% of the 158 complete records}. Median creatinine fell from \textbf{1.30 to 1.10 mg/dL} overall (383 measured, 158 complete), but rose from \textbf{2.25 to 4.10 mg/dL} within CKD (238 measured, 43 complete). The pooled decrease concealed the higher readings among the CKD patients who remained.
   \end{block}
 
-  \begin{alertblock}{Which patients did we study?}
-    We examined \textbf{250 of 400 hospital records} in the UCI dataset, all labeled CKD \citep{uci}. We used the available measurements for each question. These records describe differences between patients at one point in time.
+  \begin{alertblock}{Three ways to read the same records}
+    \textbf{Available} uses the fields needed for each question. \textbf{Complete} requires all 24 explanatory fields. \textbf{Imputed} retains all 400 records, filling numerical fields with the pooled median and categorical fields with the pooled mode. Diagnosis labels were excluded from the fill calculations.
   \end{alertblock}
 \end{column}
 
 \separatorcolumn
 
 \begin{column}{\colwidth}
-  \begin{block}{Why measure hemoglobin?}
-    Hemoglobin carries oxygen in red blood cells. The kidneys release a hormone that helps the body make these cells. With too few red cells or too little hemoglobin, a person has anemia \citep{anemia}.
-  \end{block}
-
-  \begin{block}{How did hemoglobin vary with creatinine?}
-    Across 198 patients with both blood tests, a doubling of creatinine was associated with \textbf{0.90 units lower mean hemoglobin} (95\% confidence interval 0.62--1.18 lower).
+  \begin{block}{Filling hemoglobin created a spike at 12.65}
+    Among 348 patients with measured hemoglobin, \textbf{none} had the pooled median value of 12.65. Single imputation assigned it to \textbf{52 patients}, placing 13\% of all records at a value no patient had actually recorded.
 
     \begin{figure}
       \centering
-      \includegraphics[width=.96\linewidth]{figures/hemoglobin_fit.pdf}
-      \caption{Each circle is a patient. The shaded band is the 95\% confidence interval for the fitted mean. Hemoglobin uses the units supplied by UCI.}
+      \includegraphics[width=.97\linewidth]{figures/hemoglobin_views.pdf}
+      \caption{Each step is the share of that sample at or below a hemoglobin value. UCI records hemoglobin in \emph{gms} without a volume denominator.}
     \end{figure}
-
-    Record~43 had \textbf{hemoglobin of 9.7} at creatinine of 1.0 mg/dL.
+    The middle half of the measured results spanned 4.70 source units. Filling the missing entries narrowed that span to 3.75. A reader using the filled data would see less variation between patients.
   \end{block}
 
-  \begin{block}{Why check blood sugar as well?}
-    Persistently high blood sugar can damage blood vessels in the kidneys \citep{diabetes}. A diabetes history records a past diagnosis. A random glucose test measures blood sugar at the time of the test.
-
+  \begin{block}{Creatinine and urea remained positively related}
     \begin{table}
       \centering
-      \begin{tabular}{lrr}
+      \begin{tabular}{lrrr}
         \toprule
-        \textbf{Diabetes history} & \textbf{High / tested} & \textbf{Percent} \\
+        \textbf{Data used} & \textbf{Pairs} & \textbf{Pearson $r$} & \textbf{Spearman $\rho$} \\
         \midrule
-        No  & 11/87  & 12.6\% \\
-        Yes & 61/125 & 48.8\% \\
+        Both tests measured & 380 & 0.586 & 0.703 \\
+        All fields complete & 158 & 0.896 & 0.478 \\
+        Single imputation   & 400 & 0.582 & 0.696 \\
         \bottomrule
       \end{tabular}
-      \caption{High random glucose was defined as 200 mg/dL or above.}
+      \caption{Across all patients, deletion strengthened the linear association and weakened the rank association. Coefficients use the original units.}
     \end{table}
-
-    Glucose was missing in 26 of 113 patients without a diabetes history and 12 of 137 with one. A single high reading requires clinical context to diagnose diabetes.
+    One measured creatinine of \textbf{76 mg/dL} influenced the linear result. Temporarily omitting it raised $r$ from 0.586 to 0.674, while $\rho$ moved from 0.703 to 0.701. The main analysis retained it. Taking the natural log of the same 383 positive creatinine values reduced skewness from 7.51 to 1.03.
+  \end{block}
+  \begin{block}{Changing units changed the main pattern}
+    We kept the same 400 imputed records and five measurements (hemoglobin, creatinine, urea, glucose and blood pressure). In their original units, glucose dominated the first principal component, which accounted for 68.8\% of variance. Giving each measurement unit variance reduced that share to 43.3\%. Urea, hemoglobin and creatinine then carried the largest weights in magnitude.
   \end{block}
 \end{column}
 
 \separatorcolumn
 
 \begin{column}{\colwidth}
-  \begin{exampleblock}{Who else had urine albumin grade 0?}
-    Of 45 grade-0 patients with both anemia status and glucose recorded, \textbf{16 had anemia or high glucose}. Two had both findings.
+  \begin{exampleblock}{Which other grade-0 patients remained visible?}
+    In the CKD group, 45 patients had urine albumin grade~0 and known anemia status and glucose. Of these, \textbf{16 had anemia or random glucose $\geq$200 mg/dL}. Complete-case deletion excluded all 16, including Record~43.
 
     \begin{figure}
       \centering
-      \includegraphics[width=.96\linewidth]{figures/overlap_counts.pdf}
-      \caption{One symbol represents one person. The arrow marks Record~43.}
+      \includegraphics[width=.97\linewidth]{figures/grade_zero_selection.pdf}
+      \caption{Each position tracks the same patient in both panels. The ring marks Record~43. Only one of the 45 remained when every field was required. That patient had neither finding.}
     \end{figure}
-
-    \heading{Back to Record 43}
-    The chart documented \textbf{anemia} and a random glucose of \textbf{204 mg/dL}. This patient was one of the two with both findings despite grade~0 urine albumin.
   \end{exampleblock}
 
-  \begin{block}{How common were multiple findings across all grades?}
-    We counted urine albumin grade~1 or higher, recorded anemia, and random glucose of 200 mg/dL or above in each patient.
+  \begin{block}{How often was glucose high in the CKD group?}
+    \begin{table}
+      \centering
+      \begin{tabular}{lrr}
+        \toprule
+        \textbf{Data used} & \textbf{High / included} & \textbf{Share} \\
+        \midrule
+        Glucose measured & 72/212 & 34.0\% \\
+        All fields complete & 20/43 & 46.5\% \\
+        Single imputation & 72/250 & 28.8\% \\
+        \bottomrule
+      \end{tabular}
+      \caption{High random glucose means $\geq$200 mg/dL. Imputation put all 38 CKD records with missing glucose below that threshold at 121 mg/dL.}
+    \end{table}
+    Even if \emph{every} missing glucose value were high, the share would be at most \textbf{110/250 (44.0\%)}. The complete-case estimate of 46.5\% exceeds that upper bound. The imputed share of 28.8\% assigns every missing value below the threshold.
 
-    \textbf{70 of 175 patients (40\%)} with all three results had at least two findings. The other 75 records lacked at least one result. Counting unknown findings first as absent and then as present gives a range of \textbf{79--122 of all 250 patients (31.6--48.8\%)}.
+    These records show how a data rule changes which abnormalities are visible. Individual treatment and later outcomes were unavailable.
   \end{block}
 
-  \begin{block}{References}
+  \begin{block}{Data and methods}
+    \href{https://github.com/CanyonChen/RenalLens/tree/main/docs/reanalysis}{Five-marker distributions, audit tables and scale analyses} accompany the project. Figure preparation followed Scientific Agent Skills \citep{skills}.
     {\footnotesize\bibliographystyle{plainnat}\bibliography{poster}}
   \end{block}
 \end{column}
