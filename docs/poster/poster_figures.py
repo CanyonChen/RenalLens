@@ -42,6 +42,79 @@ def save(fig, filename, description):
     plt.close(fig)
 
 
+def case_summary_text():
+    """Render the selected patient's observed clinical values as a native table."""
+    case = pd.read_csv(PATIENTS).set_index("row_id").loc[43]
+    rows = [
+        ("Urine albumin", f"Grade {case.al:.0f}"),
+        ("Diabetes history", "Yes" if case.dm == "yes" else "No"),
+        ("Creatinine", f"{case.sc:.1f} mg/dL"),
+        ("Hemoglobin", f"{case.hemo:g} (UCI units)"),
+        ("Recorded anemia", "Yes" if case.anemia == 1 else "No"),
+        ("Random glucose", rf"\color{{maroon}}{case.bgr:.0f} mg/dL"),
+    ]
+    return (r"\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lr@{}}" + "\n"
+            + "\n".join(label + r" & \textbf{" + value + r"} \\[0.3ex]" for label, value in rows)
+            + "\n" + r"\end{tabular*}" + "\n")
+
+
+def glucose_history_data():
+    """Keep the exact measured x values and source identity of each CKD patient."""
+    patients = pd.read_csv(PATIENTS)
+    points = patients.dropna(subset=["bgr"]).copy()
+    summary = []
+    for group in ("no", "yes"):
+        subset = patients.loc[patients.dm.eq(group)]
+        summary.append({"dm": group, "n_total": len(subset),
+                        "n_measured": int(subset.bgr.count()),
+                        "n_high": int(subset.bgr.ge(200).sum()),
+                        "n_missing": int(subset.bgr.isna().sum())})
+    return points, pd.DataFrame(summary)
+
+
+def glucose_history():
+    points, summary = glucose_history_data()
+    summary = summary.set_index("dm")
+    fig, ax = plt.subplots(figsize=(8.4, 5.0))
+    fig.subplots_adjust(left=.24, right=.97, top=.88, bottom=.18)
+    labels = []
+    for group, y, name in (("no", 1, "No history"), ("yes", 0, "Recorded history")):
+        subset = points.loc[points.dm.eq(group)].sort_values(["bgr", "row_id"]).copy()
+        # Vertical offsets separate nearby marks; the measured x values stay fixed.
+        bins = (subset.bgr / 8).round()
+        within = subset.groupby(bins).cumcount()
+        counts = subset.groupby(bins).bgr.transform("size")
+        offsets = (within - (counts - 1) / 2) * .062
+        subset["plot_y"] = y + offsets
+        for high, color in ((False, GRAY), (True, GLUCOSE_ORANGE)):
+            selected = subset.loc[subset.bgr.ge(200).eq(high)]
+            ax.scatter(selected.bgr, selected.plot_y, color=color, s=20, lw=0, alpha=.85)
+        record = subset.loc[subset.row_id.eq(43)]
+        if not record.empty:
+            py = record.plot_y.item()
+            ax.scatter([record.bgr.item()], [py], marker="D", s=75, facecolor="white",
+                       edgecolor=BURGUNDY, linewidth=2, zorder=4)
+            ax.annotate("Record 43: 204", (record.bgr.item(), py), xytext=(325, 1.53),
+                        fontsize=14, color=BURGUNDY, weight="bold", ha="center",
+                        arrowprops={"arrowstyle": "-", "color": BURGUNDY, "lw": 1.3},
+                        bbox={"facecolor": "white", "edgecolor": "none", "pad": 1})
+        row = summary.loc[group]
+        labels.append(f"{name}\n{row.n_high}/{row.n_measured} high ({row.n_high/row.n_measured:.1%})")
+    ax.axvline(200, color=GLUCOSE_ORANGE, lw=1.4, ls=(0, (4, 3)), zorder=0)
+    ax.text(195, 1.53, "200", color=GLUCOSE_ORANGE, fontsize=13, ha="right", va="center")
+    ax.set(xlim=(0, 515), ylim=(-.52, 1.78), yticks=[1, 0], yticklabels=labels,
+           xticks=[0, 100, 200, 300, 400, 500], xlabel="Random glucose (mg/dL)")
+    ax.tick_params(axis="y", length=0, pad=9, labelsize=13.5)
+    ax.tick_params(axis="x", labelsize=13)
+    ax.spines[["left", "top", "right"]].set_visible(False)
+    ax.grid(axis="x", color=LIGHT, lw=.6, zorder=0)
+    fig.text(.24, .975, f"{len(points)} measured CKD records", ha="left", va="top",
+             fontsize=14, weight="bold")
+    save(fig, "glucose_history.pdf", "Exact measured random glucose for 212 CKD records, "
+         "separated by recorded diabetes history. Vertical offsets only separate marks. "
+         "The 200 mg/dL threshold and source Record 43 at 204 mg/dL are marked.")
+
+
 def measured_grade_zero(patients):
     grade = patients.loc[patients.al.eq(0)].dropna(subset=["anemia", "high_glucose"])
     return grade.assign(finding=grade.anemia.eq(1) | grade.high_glucose.eq(1))
@@ -115,107 +188,63 @@ def missing_data_paths():
 
 
 def cohort():
-    rates = pd.read_csv(TABLES / "missingness.csv")
-    top = rates.loc[rates.group.eq("all")].nlargest(5, "n_missing")
-    labels = {"rbc": "Red cell assessment", "rbcc": "Red cell count",
-              "wbcc": "White cell count", "pot": "Potassium", "sod": "Sodium"}
     eligibility = pd.read_csv(TABLES / "eligibility_rules.csv").set_index(["rule", "group"])
-    shifts = pd.read_csv(TABLES / "median_shifts.csv").query("feature == 'sc'").set_index("group")
-    fig, (fields, mix, medians) = plt.subplots(
-        1, 3, figsize=(15.2, 6.25), layout="constrained",
-        gridspec_kw={"width_ratios": [1.20, 1.28, 1.03], "wspace": .045})
-    fields.set_title("Most often missing", loc="left")
-    y = np.arange(len(top))
-    counts = top.n_missing.to_numpy()
-    fields.barh(y, counts, .56, color=GRAY)
-    for pos, row in enumerate(top.itertuples()):
-        fields.text(row.n_missing + 4, pos, f"{row.n_missing}  ({row.missing_rate:.1%})",
-                    va="center", fontsize=12)
-    fields.set(yticks=y, yticklabels=[labels[f] for f in top.feature], xticks=[0, 50, 100, 150],
-               xlim=(0, 245), xlabel="Missing records (of 400)")
-    fields.invert_yaxis()
-
-    mix.set_title("Eligibility changes the cohort", loc="left")
-    strategies = [(None, "All records"), ("core5", "5 markers"), ("all24", "24 fields")]
-    for pos, (rule, _) in enumerate(strategies):
+    fig, ax = plt.subplots(figsize=(8.9, 4.1))
+    fig.subplots_adjust(left=.21, right=.82, top=.88, bottom=.20)
+    strategies = [(None, "All records"), ("core5", "Five markers"), ("all24", "All 24 fields")]
+    labels = []
+    for pos, (rule, label) in enumerate(strategies):
+        total = eligibility.loc[("all24", "all"), "n_original_group"] if rule is None else eligibility.loc[(rule, "all"), "n_retained"]
+        labels.append(f"{label}\nn = {total}")
         left = 0
         for group, color, hatch in [("ckd", BURGUNDY, ""), ("notckd", TEAL, "///")]:
             n = eligibility.loc[("all24", group), "n_original_group"] if rule is None else eligibility.loc[(rule, group), "n_retained"]
-            mix.barh(pos, n, .55, left=left, facecolor=color, edgecolor="white", hatch=hatch, lw=1)
-            mix.text(left + n / 2, pos, str(int(n)), ha="center", va="center", color="white",
-                     fontsize=13, weight="bold", bbox={"fc": color, "ec": "none", "pad": 1})
+            ax.barh(pos, n, .59, left=left, facecolor=color, edgecolor="white", hatch=hatch, lw=1)
+            ax.text(left + n / 2, pos, str(int(n)), ha="center", va="center", color="white", fontsize=15,
+                    weight="bold", bbox={"fc": color, "ec": "none", "pad": 1})
             left += n
-        share = 250 / 400 if rule is None else eligibility.loc[(rule, "ckd"), "share_of_retained"]
-        mix.text(left + 7, pos, f"{share:.1%}", va="center", fontsize=11.8, color=BURGUNDY,
-                 weight="bold")
-    mix.set(yticks=[0, 1, 2], yticklabels=[x[1] for x in strategies], xlim=(0, 510),
-            xticks=[0, 200, 400], xlabel="Patient records")
-    mix.set_ylim(2.55, -.95)
-    mix.legend(handles=[plt.Rectangle((0, 0), 1, 1, fc=BURGUNDY, label="CKD"),
-                        plt.Rectangle((0, 0), 1, 1, fc=TEAL, hatch="///", ec="white", label="Non-CKD")],
-               loc="upper right", bbox_to_anchor=(1, 1.04), ncol=2, handlelength=1.2, fontsize=11.5)
-    for ax in (fields, mix):
-        ax.spines["left"].set_visible(False)
-        ax.tick_params(axis="y", length=0)
-    medians.set_title("Median creatinine (mg/dL)", loc="left")
-    for group, label, color, marker, line in [
-            ("all", "All", INK, "o", "--"), ("ckd", "CKD", BURGUNDY, "s", "-")]:
-        measured = shifts.loc[group, "median_observed"]
-        complete = shifts.loc[group, "median_complete"]
-        medians.plot([0, 1], [measured, complete], color=color, marker=marker, ls=line, lw=2)
-        medians.annotate(f"{measured:.2f}", (0, measured), xytext=(0, 8),
-                         textcoords="offset points", ha="center", color=color, fontsize=12.8)
-        medians.annotate(f"{complete:.2f}  {label}", (1, complete), xytext=(5, 0),
-                         textcoords="offset points", va="center", color=color, fontsize=12.8,
-                         weight="bold")
-    medians.set(xlim=(-.22, 1.69), ylim=(0, 4.9), yticks=[0, 2, 4],
-                xticks=[0, 1], xticklabels=["Measured", "Complete"])
-    medians.grid(axis="y", color=LIGHT, lw=.8)
-    save(fig, "cohort_selection.pdf", "Missingness, eligibility by diagnosis for all records, "
-         "five-marker complete cases and all-24-field complete cases, plus the opposite "
-         "changes in median creatinine overall and within CKD under the all-24 rule.")
+        ckd = eligibility.loc[("all24", "ckd"), "n_original_group"] if rule is None else eligibility.loc[(rule, "ckd"), "n_retained"]
+        ax.text(430, pos, f"{ckd/total:.1%}", va="center", fontsize=15, color=BURGUNDY, weight="bold")
+    ax.text(430, -.63, "CKD share", fontsize=13, color=GRAY, ha="left")
+    ax.set(yticks=[0, 1, 2], yticklabels=labels, xlim=(0, 410), ylim=(2.5, -.75),
+           xticks=[0, 100, 200, 300, 400], xlabel="Patient records retained")
+    ax.tick_params(axis="y", length=0, pad=11, labelsize=14)
+    ax.tick_params(axis="x", labelsize=13)
+    ax.spines["left"].set_visible(False)
+    ax.legend(handles=[plt.Rectangle((0, 0), 1, 1, fc=BURGUNDY, label="CKD"),
+                       plt.Rectangle((0, 0), 1, 1, fc=TEAL, hatch="///", ec="white", label="Non-CKD")],
+              loc="lower left", bbox_to_anchor=(0, 1.01), ncol=2, handlelength=1.3, fontsize=14)
+    save(fig, "cohort_selection.pdf", "Counts and CKD share for all records, five-marker "
+         "complete cases and all-24-field complete cases. Bars share a zero-based count axis.")
 
 
 def hemoglobin():
     values = pd.read_csv(TABLES / "measurement_values.csv")
     hb = values.loc[values.feature.eq("hemo")]
-    series = [
-        ("Available", hb.observed.dropna(), INK, "-"),
-        ("Complete", hb.loc[hb.complete_case, "observed"], BURGUNDY, (0, (5, 2))),
-        ("Imputed", hb.imputed, TEAL, (0, (1, 1.35))),
-    ]
-    fig, (ax, middle_half) = plt.subplots(
-        2, 1, sharex=True, figsize=(8.4, 5.95), layout="constrained",
-        gridspec_kw={"height_ratios": [3.65, 1.05], "hspace": .04})
-    for name, v, color, ls in series:
-        unique, counts = np.unique(v, return_counts=True)
-        ax.step(np.r_[unique[0], unique], np.r_[0, counts.cumsum() / len(v)], where="post",
-                color=color, ls=ls, lw=2.6, label=f"{name}  (n = {len(v)})")
-    filled_at = hb.observed.median()
+    series = [("Available", hb.observed.dropna(), INK, "-"),
+              ("Complete", hb.loc[hb.complete_case, "observed"], BURGUNDY, (0, (5, 2))),
+              ("Imputed", hb.imputed, TEAL, (0, (1, 1.35)))]
+    fig, ax = plt.subplots(figsize=(8.9, 4.7))
+    fig.subplots_adjust(left=.13, right=.97, top=.96, bottom=.17)
+    for name, values, color, line in series:
+        unique, counts = np.unique(values, return_counts=True)
+        ax.step(np.r_[unique[0], unique], np.r_[0, counts.cumsum()/len(values)], where="post",
+                color=color, ls=line, lw=2.6, label=f"{name}  (n = {len(values)})")
+    median = hb.observed.median()
     n_filled = hb.observed.isna().sum()
-    midpoint = ((hb.imputed < filled_at).sum() + n_filled / 2) / len(hb)
-    ax.annotate(f"{n_filled} filled at {filled_at:.2f}", (filled_at, midpoint),
-                xytext=(.965, .18), textcoords="axes fraction", color=TEAL, weight="bold",
-                ha="right", fontsize=13.5, arrowprops={"arrowstyle": "-|>", "color": TEAL, "lw": 1.5},
+    midpoint = ((hb.imputed < median).sum() + n_filled/2)/len(hb)
+    ax.annotate(f"{n_filled} filled at {median:.2f}", (median, midpoint), xytext=(.97, .18),
+                textcoords="axes fraction", color=TEAL, weight="bold", ha="right", fontsize=14.5,
+                arrowprops={"arrowstyle": "-|>", "color": TEAL, "lw": 1.5},
                 bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5})
-    ax.set(ylim=(-.025, 1.03), yticks=[0, .25, .5, .75, 1], ylabel="Share at or below value")
+    ax.set(ylim=(-.025, 1.03), yticks=[0, .25, .5, .75, 1],
+           ylabel="Share at or below value", xlabel="Hemoglobin (UCI source units)")
     ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
     ax.grid(axis="y", color=LIGHT, lw=.8)
-    ax.legend(loc="upper left", fontsize=12)
-    for pos, (label, v, color, pattern) in zip([2, 1, 0], series, strict=True):
-        q1, median, q3 = v.quantile([.25, .50, .75])
-        middle_half.plot([q1, q3], [pos, pos], color=color, lw=3, linestyle=pattern)
-        middle_half.vlines([q1, q3], pos - .16, pos + .16, color=color, lw=1.5)
-        middle_half.scatter(median, pos, facecolor="white", edgecolor=color, s=36, lw=1.6, zorder=3)
-        middle_half.annotate(f"{q3 - q1:.2f}", (q3, pos), xytext=(7, 0), textcoords="offset points",
-                             va="center", color=color, fontsize=12.5, weight="bold")
-    middle_half.set(yticks=[2, 1, 0], yticklabels=[entry[0] for entry in series],
-                    ylim=(-.43, 2.47), xlabel="Hemoglobin (UCI source units)")
-    middle_half.tick_params(axis="y", length=0, labelsize=12.4)
-    middle_half.spines["left"].set_visible(False)
-    save(fig, "hemoglobin_views.pdf", "Cumulative distributions on a common hemoglobin axis. "
-         "The lower intervals span the 25th to 75th percentiles, dots mark medians, and labels "
-         "give interquartile widths in the source units.")
+    ax.legend(loc="upper left", fontsize=14)
+    ax.tick_params(axis="both", labelsize=13)
+    save(fig, "hemoglobin_views.pdf", "Three empirical cumulative distributions on one "
+         "hemoglobin axis. Fifty-two imputed values create a 13% step at 12.65 source units.")
 
 
 def renal_coefficients():
@@ -319,8 +348,8 @@ def pca_scale():
     weights = pd.read_csv(TABLES / "pca_loadings.csv").query("component == 'PC1'").set_index(["scale", "feature"])
     features = ["hemo", "sc", "bu", "bgr", "bp"]
     labels = ["Hemoglobin", "Creatinine", "Blood urea", "Glucose", "Blood pressure"]
-    fig, axes = plt.subplots(1, 2, figsize=(8.9, 2.70), sharey=True)
-    fig.subplots_adjust(left=.19, right=.975, bottom=.20, top=.81, wspace=.25)
+    fig, axes = plt.subplots(1, 2, figsize=(8.9, 4.05), sharey=True)
+    fig.subplots_adjust(left=.21, right=.97, bottom=.19, top=.79, wspace=.23)
     for ax, key, name in zip(axes, ["raw", "zscore"], ["Original units", "Unit variance"], strict=True):
         share = pc1.loc[key, "explained_fraction"]
         coefficients = np.array([weights.loc[(key, feature), "eigenvector_weight"] for feature in features])
@@ -329,16 +358,16 @@ def pca_scale():
         for y, coefficient in enumerate(coefficients):
             ax.annotate(f"{coefficient:+.2f}", (coefficient, y),
                         xytext=(4 if coefficient >= 0 else -4, 0), textcoords="offset points",
-                        ha="left" if coefficient >= 0 else "right", va="center", fontsize=11.1)
-        ax.set_title(f"{name}\nPC1: {share:.1%} of variance", fontsize=12.6, pad=8)
+                        ha="left" if coefficient >= 0 else "right", va="center", fontsize=12.5)
+        ax.set_title(f"{name}\nPC1: {share:.1%} of variance", fontsize=14, pad=10)
         ax.set(xlim=(-.78, 1.25), ylim=(4.6, -.6), xticks=[-.5, 0, .5, 1],
                xticklabels=["−0.5", "0", "0.5", "1.0"])
         ax.grid(axis="x", color=LIGHT, lw=.6)
         ax.spines[["left", "top", "right"]].set_visible(False)
-        ax.tick_params(axis="y", length=0, pad=7, labelsize=11.6)
-        ax.tick_params(axis="x", labelsize=10.8, length=3)
+        ax.tick_params(axis="y", length=0, pad=7, labelsize=13)
+        ax.tick_params(axis="x", labelsize=12.5, length=3)
     axes[0].set_yticks(np.arange(5), labels)
-    fig.text(.59, .025, "Signed PC1 eigenvector coefficient", ha="center", fontsize=11.8)
+    fig.text(.59, .035, "Signed PC1 eigenvector coefficient", ha="center", fontsize=13)
     save(fig, "pca_scale.pdf",
          "Signed PC1 eigenvector coefficients for five markers in the same 400 imputed "
          "records. Original-unit PC1 explains 68.8% of variance; unit-variance PC1 explains 43.3%.")
@@ -383,15 +412,14 @@ def grade_zero():
 
 if __name__ == "__main__":
     FIGURES.mkdir(exist_ok=True)
+    (HERE / "case_record43.tex").write_text(case_summary_text(), encoding="utf-8")
     with plt.rc_context({"font.family": "DejaVu Sans", "font.size": 13.5, "axes.titlesize": 15,
                          "axes.titleweight": "bold", "axes.spines.top": False, "axes.spines.right": False,
                          "axes.labelcolor": INK, "axes.edgecolor": GRAY, "text.color": INK,
                          "xtick.color": INK, "ytick.color": INK, "axes.axisbelow": True,
                          "legend.frameon": False, "hatch.linewidth": .65, "pdf.fonttype": 42}):
-        missing_data_paths()
+        glucose_history()
         cohort()
         hemoglobin()
-        grade_zero()
         renal_coefficients()
-        glucose_bounds()
         pca_scale()

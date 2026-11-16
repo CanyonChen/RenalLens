@@ -29,15 +29,15 @@
 \newlength{\sepwidth}
 \newlength{\flowcolwidth}
 \newlength{\colwidth}
-\setlength{\sepwidth}{0.025\paperwidth}
-\setlength{\flowcolwidth}{0.354\paperwidth}
-\setlength{\colwidth}{0.273\paperwidth}
+\setlength{\sepwidth}{0.0175\paperwidth}
+\setlength{\flowcolwidth}{0.25\paperwidth}
+\setlength{\colwidth}{0.34\paperwidth}
 \newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
 
-\title{RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease}
+\title{RenalLens: When Missing Data Change the Picture}
 \author{BAI Yingdong \and CHEN Canyang \and LI Jiaheng \and PENG Peiyan \and ZHAI Junsong \and ZHANG Junjie}
-\institute[CityUHK]{DSC5002-C61, Group 65}
-\hypersetup{pdftitle={RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease},
+\institute[CityUHK]{Chronic kidney disease data \enspace\textbar\enspace DSC5002-C61, Group 65}
+\hypersetup{pdftitle={RenalLens: When Missing Data Change the Picture},
   pdfauthor={BAI Yingdong, CHEN Canyang, LI Jiaheng, PENG Peiyan, ZHAI Junsong, ZHANG Junjie},
   pdfsubject={DSC5002 RenalLens group project}}
 \footercontent{
@@ -60,76 +60,84 @@
 \separatorcolumn
 
 \begin{column}{\flowcolwidth}
-  \begin{block}{Would Record 43's high glucose be counted?}
-    UCI record~43 had chronic kidney disease (CKD), documented anemia and urine albumin grade~0 (the lowest recorded grade). Random glucose was \textbf{204 mg/dL}. Of the 24 fields, only the red blood cell assessment was missing.
+  \begin{block}{Start with Record 43}
+    One CKD-labeled patient has an observed glucose result above the study's 200 mg/dL threshold.
+
+    \vspace{.4ex}
+    \input{case_record43.tex}
+
+    \textbf{Only the red cell assessment (rbc) is missing.} The 24-field rule excludes this record; the five-marker rule retains it.
   \end{block}
 
-  \begin{alertblock}{How three missing-data rules select records}
-    \centering
-    \includegraphics[width=\linewidth]{figures/missing_data_paths.pdf}\par
-    {\small Record~43's measured glucose survives both available-case analysis and imputation. Requiring all 24 fields discards it because one unrelated assessment is missing.\par}
+  \begin{block}{See the measured patients}
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{figures/glucose_history.pdf}
+      \caption{Each dot is one measured CKD record; the diamond marks Record 43. Orange points meet the study threshold. Glucose is missing in 26 no-history and 12 history records.}
+    \end{figure}
+  \end{block}
+
+  \begin{alertblock}{Compare three processing choices}
+    \textbf{Available:} use the measured fields each question needs.\par
+    \textbf{Complete:} require all 24 explanatory fields. Also compare the five-marker requirement.\par
+    \textbf{Filled:} use pooled medians for numbers and modes for categories. Diagnosis is excluded from filling.
   \end{alertblock}
 
-  \begin{block}{Median creatinine fell overall and rose within CKD}
-    \begin{figure}
-      \centering
-      \includegraphics[width=.98\linewidth]{figures/cohort_selection.pdf}
-      \caption{Five-marker eligibility requires hemoglobin, creatinine, urea, glucose and blood pressure; right-hand percentages give CKD shares. The creatinine medians compare measured values with the all-24-field rule: 383 vs 158 records overall, and 238 vs 43 within CKD.}
-    \end{figure}
-    Requiring all 24 fields retained \textbf{158 records} (43 CKD, 115 non-CKD); requiring only the five markers retained \textbf{300} (165 CKD, 135 non-CKD). CKD's share was \textbf{27.2\% vs 55.0\%}, compared with 62.5\% originally. Under the 24-field rule, the overall median concealed higher creatinine among the CKD patients who remained.
+  \begin{block}{The question}
+    Which patients, distributions and relationships remain visible after these choices?
   \end{block}
 \end{column}
 
 \separatorcolumn
 
 \begin{column}{\colwidth}
-  \begin{block}{Filling hemoglobin created a spike at 12.65}
-    None of the 348 measured hemoglobin values equaled the pooled median of 12.65. Imputation placed \textbf{52 of 400 records (13\%)} at that value and narrowed the middle half of the distribution from 4.70 to 3.75 source units.
-
+  \begin{block}{1. Selection changes the cohort}
+    The same 400 records yield different cohorts when completeness requires different fields.
     \begin{figure}
       \centering
-      \includegraphics[width=.97\linewidth]{figures/hemoglobin_views.pdf}
-      \caption{The upper curves show the share at or below each value. Below, each bar spans the middle half of its sample, the circle marks the median and the label gives the bar's width. UCI reports hemoglobin in \emph{gms} without a volume denominator.}
+      \includegraphics[width=\linewidth]{figures/cohort_selection.pdf}
+      \caption{Five markers: hemoglobin, creatinine, urea, glucose and blood pressure. Counts share one zero-based axis; right-hand percentages give CKD shares.}
     \end{figure}
+    \textbf{CKD retention: 43/250 with 24 fields, versus 165/250 with five.} Non-CKD retention is 115/150 versus 135/150.
+
+    Under the 24-field rule, median creatinine falls from \textbf{1.30 to 1.10 mg/dL} overall ($n=383\to158$), but rises from \textbf{2.25 to 4.10} within CKD ($n=238\to43$). Both diagnosis mix and within-group selection change.
   \end{block}
 
-  \begin{block}{Deletion changed the creatinine--urea correlation}
+  \begin{block}{2. Filling changes the distribution}
+    A single fill value creates a visible concentration: \textbf{52/400 records (13\%)} receive hemoglobin 12.65.
     \begin{figure}
       \centering
-      \includegraphics[width=.98\linewidth]{figures/renal_coefficients.pdf}
-      \caption{Whiskers give 95\% bootstrap intervals for the measured and complete-case estimates (5,000 resamples within diagnosis groups). Diamonds show descriptive imputed estimates. Triangles show a separate check on the measured pairs.}
+      \includegraphics[width=\linewidth]{figures/hemoglobin_views.pdf}
+      \caption{Curves show the share at or below each value, on the same axis. None of the 348 measured values equals 12.65. Hemoglobin keeps UCI's source units.}
     \end{figure}
-    Requiring all 24 fields strengthened the linear correlation and weakened the rank correlation. Omitting the highest creatinine (\textbf{76 mg/dL}) affected mainly the linear result. The main analysis retained it. Taking the natural log of the 383 positive creatinine values reduced skewness from 7.51 to 1.03.
   \end{block}
 \end{column}
 
 \separatorcolumn
 
 \begin{column}{\colwidth}
-  \begin{exampleblock}{Which other grade-0 patients remained visible?}
-    Of \textbf{54 CKD records with urine albumin grade~0}, 47 had measured creatinine (\textbf{0.6--24.0 mg/dL}). Among the 45 with known anemia status and glucose, \textbf{16 had anemia or glucose $\geq$200 mg/dL}; Record~43 was one of two with both.
-
+  \begin{block}{3. Deletion changes the association}
+    Creatinine and blood urea give different answers about linear and rank association after deletion.
     \begin{figure}
       \centering
-      \includegraphics[width=.97\linewidth]{figures/grade_zero_selection.pdf}
-      \caption{Positions identify the same patients; the ring marks Record~43. All 16 with a finding were excluded. The only one of 45 retained had neither finding.}
-      \label{fig:grade-retention}
+      \includegraphics[width=\linewidth]{figures/renal_coefficients.pdf}
+      \caption{Whiskers: 95\% bootstrap intervals from 5,000 resamples within diagnosis. Filled estimates are descriptive. The last row separately omits the highest creatinine from measured pairs.}
     \end{figure}
-  \end{exampleblock}
+    \textbf{Pearson rises from 0.586 to 0.896; Spearman falls from 0.703 to 0.478.} The highest creatinine (76 mg/dL) mainly affects the linear result; it remains in the main analysis.
+  \end{block}
 
-  \begin{block}{How often was glucose high in the CKD group?}
+  \begin{block}{4. Units change the summary}
+    Hold the same 400 filled records and five markers fixed; change only their measurement scales.
     \begin{figure}
       \centering
-      \includegraphics[width=.98\linewidth]{figures/glucose_bounds.pdf}
-      \caption{High means random glucose $\geq$200 mg/dL. Assigning the 38 missing readings as low or high gives 72/250--110/250. Each method prints its own denominator.}
+      \includegraphics[width=\linewidth]{figures/pca_scale.pdf}
+      \caption{Signed PC1 coefficients use the same coefficient scale. Standardization moves the axis from glucose dominance to urea, hemoglobin and creatinine, with hemoglobin pointing oppositely.}
     \end{figure}
-    Complete cases gave \textbf{46.5\%}, above the full-cohort maximum of \textbf{44.0\%}. Filling 38 gaps at 121 mg/dL gave 28.8\%. Treatment and follow-up outcomes were not recorded.
+    \textbf{Read the preprocessing with the picture:} choose fields for the question, show each denominator and keep measured values distinct from filled values.
   \end{block}
 
-  \begin{block}{Which tests dominate a five-marker summary?}
-    {\centering\includegraphics[width=.98\linewidth]{figures/pca_scale.pdf}\par}
-    Signed coefficients use the same 400 imputed records. Standardizing the five markers shifted PC1 from glucose dominance to urea, hemoglobin and creatinine; hemoglobin pointed in the opposite direction.
-  \end{block}
+  {\small\raggedright Follow Record 43 through both interactive views:\par
+  \href{https://github.com/CanyonChen/RenalLens/tree/zjj/visualization-integration}{\texttt{zjj/visualization-integration}} \enspace\textbar\enspace open \texttt{docs/index.html}.\par}
 \end{column}
 
 \separatorcolumn
