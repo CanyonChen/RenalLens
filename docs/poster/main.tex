@@ -7,7 +7,7 @@
 
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage[size=custom,width=120,height=72,scale=1.0]{beamerposter}
+\usepackage[size=custom,width=124,height=74.4,scale=1.0]{beamerposter}
 \usetheme{gemini}
 \usecolortheme{uchicago}
 \usepackage{graphicx}
@@ -29,9 +29,11 @@
 \definecolor{darkgray}{HTML}{615961}
 
 \newlength{\sepwidth}
+\newlength{\flowcolwidth}
 \newlength{\colwidth}
 \setlength{\sepwidth}{0.025\paperwidth}
-\setlength{\colwidth}{0.3\paperwidth}
+\setlength{\flowcolwidth}{0.32\paperwidth}
+\setlength{\colwidth}{0.29\paperwidth}
 \newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
 
 \title{RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease}
@@ -58,24 +60,25 @@
 \begin{columns}[t]
 \separatorcolumn
 
-\begin{column}{\colwidth}
-  \begin{block}{One missing field excluded Record 43}
-    Among 400 UCI patient records, 250 carried a chronic kidney disease (CKD) label \citep{uci}. Record~43 had documented anemia, urine albumin grade~0 (the lowest recorded grade) and random glucose of \textbf{204 mg/dL}. Its only missing field was the red blood cell assessment. Requiring all 24 fields removed this patient and all three known results from the analysis.
-
-    \begin{figure}
-      \centering
-      \includegraphics[width=.97\linewidth]{figures/cohort_selection.pdf}
-      \caption{Panel B counts patients. Requiring all 24 explanatory fields retained 43/250 CKD records (17.2\%) and 115/150 non-CKD records (76.7\%).}
-    \end{figure}
-  \end{block}
-
-  \begin{block}{The changing sample reversed the apparent shift}
-    CKD accounted for \textbf{62.5\% of all 400 records} and \textbf{27.2\% of the 158 complete records}. Median creatinine fell from \textbf{1.30 to 1.10 mg/dL} overall (383 measured, 158 complete), but rose from \textbf{2.25 to 4.10 mg/dL} within CKD (238 measured, 43 complete). The pooled decrease concealed the higher readings among the CKD patients who remained.
+\begin{column}{\flowcolwidth}
+  \begin{block}{Would Record 43's high glucose be counted?}
+    Record~43 had chronic kidney disease (CKD), documented anemia and urine albumin grade~0 (the lowest recorded grade). Random glucose was \textbf{204 mg/dL}. Of the 24 fields, only the red blood cell assessment was missing \citep{uci}.
   \end{block}
 
   \begin{alertblock}{Three ways to read the same records}
-    \textbf{Available} uses the fields needed for each question. \textbf{Complete} requires all 24 explanatory fields. \textbf{Imputed} retains all 400 records, filling numerical fields with the pooled median and categorical fields with the pooled mode. Diagnosis labels were excluded from the fill calculations.
+    \centering
+    \includegraphics[width=\linewidth]{figures/missing_data_paths.pdf}\par
+    {\small Fill values were pooled across all records without using diagnosis labels.\par}
   \end{alertblock}
+
+  \begin{block}{The changing sample reversed the apparent shift}
+    \begin{figure}
+      \centering
+      \includegraphics[width=.82\linewidth]{figures/cohort_selection.pdf}
+      \caption{Requiring all 24 fields retained 17.2\% of CKD records (43/250) and 76.7\% of non-CKD records (115/150).}
+    \end{figure}
+    CKD accounted for \textbf{62.5\% of all 400 records} and \textbf{27.2\% of the 158 complete records}. Median creatinine fell from \textbf{1.30 to 1.10 mg/dL} overall (383 measured, 158 complete), but rose from \textbf{2.25 to 4.10 mg/dL} within CKD (238 measured, 43 complete). The pooled decrease concealed the higher readings among the CKD patients who remained.
+  \end{block}
 \end{column}
 
 \separatorcolumn

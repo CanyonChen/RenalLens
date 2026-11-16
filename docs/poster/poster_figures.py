@@ -1,4 +1,4 @@
-"""Export the three print panels from the published RenalLens result tables.
+"""Export the poster figures from the published RenalLens result tables.
 
 Run from any directory with the project's Python environment. Each original record
 has a one-based row_id. Complete cases have all 24 explanatory fields observed.
@@ -12,6 +12,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.patches import FancyBboxPatch
 from matplotlib.ticker import PercentFormatter
 import numpy as np
 import pandas as pd
@@ -29,9 +30,72 @@ LIGHT = "#E1DDE1"
 
 
 def save(fig, filename, description):
-    fig.savefig(FIGURES / filename, facecolor="white",
+    fig.savefig(FIGURES / filename, facecolor=fig.get_facecolor(),
                 metadata={"Creator": "RenalLens", "Subject": description, "CreationDate": None})
     plt.close(fig)
+
+
+def missing_data_paths():
+    """Adapt the cohort fork in RenalLensPoster/figures/Figure_1.svg to the three data rules."""
+    values = pd.read_csv(TABLES / "measurement_values.csv")
+    glucose = values.loc[values.feature.eq("bgr")].set_index("row_id")
+    ckd = glucose.loc[glucose.group.eq("ckd")]
+    complete = glucose.loc[glucose.complete_case]
+    n_complete_ckd = complete.group.eq("ckd").sum()
+    case = glucose.loc[43]
+
+    # Use the same view colors as the hemoglobin figure. Every path also has
+    # a method name and an explicit patient disposition for monochrome prints.
+    paths = [
+        ("Available case", INK, "Use the measured fields\neach question needs.",
+         f"{ckd.observed.count()} of {len(ckd)} CKD records\nhave measured glucose.",
+         "Record 43 retained", f"{case.observed:.0f} mg/dL measured"),
+        ("Complete case", BURGUNDY, "Require all 24 fields\nto be present.",
+         f"{len(complete)} records retained\n{n_complete_ckd} CKD + {len(complete) - n_complete_ckd} non-CKD",
+         "Record 43 excluded", f"{case.observed:.0f} mg/dL omitted"),
+        ("Single imputation", TEAL, "Median for missing numbers,\nmode for missing categories.",
+         f"{len(glucose)} records retained\n{len(ckd)} CKD + {len(glucose) - len(ckd)} non-CKD",
+         "Record 43 retained", f"{case.imputed:.0f} mg/dL measured"),
+    ]
+    pink = "#F6E5EA"  # Gemini alert-block background
+    fig = plt.figure(figsize=(12, 4.35), facecolor=pink)
+    ax = fig.add_axes((0, 0, 1, 1), xlim=(0, 12), ylim=(0, 4.35))
+    ax.axis("off")
+
+    def box(x, y, width, height, edge):
+        ax.add_patch(FancyBboxPatch(
+            (x, y), width, height, boxstyle="round,pad=0,rounding_size=0.09",
+            facecolor="white", edgecolor=edge, linewidth=1.3))
+
+    centers = (2.0, 6.0, 10.0)
+    box(3.2, 3.58, 5.6, .71, BURGUNDY)
+    ax.text(6, 4.08, f"{len(glucose)} UCI patient records", ha="center", va="center",
+            fontsize=20, weight="bold", color=INK)
+    ax.text(6, 3.77, f"{len(ckd)} CKD + {len(glucose) - len(ckd)} non-CKD",
+            ha="center", va="center", fontsize=16, color=INK)
+    ax.plot([6, 6], [3.58, 3.43], color=GRAY, lw=1.6)
+    ax.plot([centers[0], centers[-1]], [3.43, 3.43], color=GRAY, lw=1.6)
+
+    for x, (method, color, rule, sample, disposition, reading) in zip(centers, paths, strict=True):
+        box(x - 1.92, .06, 3.84, 3.05, color)
+        ax.annotate("", xy=(x, 3.12), xytext=(x, 3.44),
+                    arrowprops={"arrowstyle": "-|>", "color": GRAY, "lw": 1.6,
+                                "mutation_scale": 14, "shrinkA": 0, "shrinkB": 0})
+        ax.text(x, 2.84, method, ha="center", va="center", fontsize=19,
+                weight="bold", color=color)
+        ax.text(x, 2.28, rule, ha="center", va="center", fontsize=16,
+                linespacing=1.17, color=INK)
+        ax.text(x, 1.53, sample, ha="center", va="center", fontsize=16,
+                linespacing=1.17, color=INK)
+        ax.plot([x - 1.67, x + 1.67], [1.0, 1.0], lw=.9, color=color)
+        ax.text(x, .70, disposition, ha="center", va="center", fontsize=16.5,
+                weight="bold", color=color)
+        ax.text(x, .31, reading, ha="center", va="center", fontsize=16, color=INK)
+
+    save(fig, "missing_data_paths.pdf",
+         "Three parallel rules applied to the same 400 UCI records. Record 43 had measured "
+         "glucose of 204 mg/dL. Complete-case deletion omitted that reading because the "
+         "red cell assessment was missing. Available-case analysis and imputation retained it.")
 
 
 def cohort():
@@ -148,6 +212,7 @@ if __name__ == "__main__":
                          "axes.labelcolor": INK, "axes.edgecolor": GRAY, "text.color": INK,
                          "xtick.color": INK, "ytick.color": INK, "axes.axisbelow": True,
                          "legend.frameon": False, "hatch.linewidth": .65, "pdf.fonttype": 42}):
+        missing_data_paths()
         cohort()
         hemoglobin()
         grade_zero()
