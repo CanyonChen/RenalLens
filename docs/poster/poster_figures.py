@@ -53,8 +53,11 @@ def case_summary_text():
         ("Recorded anemia", "Yes" if case.anemia == 1 else "No"),
         ("Random glucose", rf"\color{{maroon}}{case.bgr:.0f} mg/dL"),
     ]
-    return (r"\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lr@{}}" + "\n"
-            + "\n".join(label + r" & \textbf{" + value + r"} \\[0.3ex]" for label, value in rows)
+    paired_rows = [left + right for left, right in zip(rows[::2], rows[1::2], strict=True)]
+    return (r"\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrlr@{}}" + "\n"
+            + "\n".join(left_label + r" & \textbf{" + left_value + "} & "
+                        + right_label + r" & \textbf{" + right_value + r"} \\[0.3ex]"
+                        for left_label, left_value, right_label, right_value in paired_rows)
             + "\n" + r"\end{tabular*}" + "\n")
 
 
@@ -292,15 +295,31 @@ def renal_coefficients():
          "highest creatinine from the measured pairs.")
 
 
-def glucose_bounds():
+def glucose_bounds_data():
+    """Separate finite-cohort missing-value bounds from each analysis denominator."""
     values = pd.read_csv(TABLES / "measurement_values.csv")
     ckd = values.loc[values.group.eq("ckd") & values.feature.eq("bgr")]
     measured = ckd.observed.dropna()
-    views = (measured, ckd.loc[ckd.complete_case, "observed"], ckd.imputed)
     n = len(ckd)
     high, missing = int(measured.ge(200).sum()), int(ckd.observed.isna().sum())
-    lower, upper = high / n, (high + missing) / n
-    fig, ax = plt.subplots(figsize=(8.9, 3.90))
+    totals = {"n_total": n, "n_high": high, "n_missing": missing,
+              "n_below": n - high - missing, "lower": high / n,
+              "upper": (high + missing) / n}
+    samples = (measured, ckd.loc[ckd.complete_case, "observed"], ckd.imputed)
+    views = []
+    for series, (key, _, _, _) in zip(samples, DATA_VIEWS, strict=True):
+        n_high = int(series.ge(200).sum())
+        views.append({"view": key, "n": len(series), "n_high": n_high,
+                      "share": n_high / len(series)})
+    return totals, pd.DataFrame(views)
+
+
+def glucose_bounds():
+    totals, views = glucose_bounds_data()
+    n, high, missing = (totals[key] for key in ("n_total", "n_high", "n_missing"))
+    lower, upper = totals["lower"], totals["upper"]
+    views = views.set_index("view")
+    fig, ax = plt.subplots(figsize=(8.9, 4.20))
     fig.subplots_adjust(left=.246, right=.952, bottom=.17, top=.976)
     ax.set(xlim=(0, 1), ylim=(-.43, 4.18), xticks=[0, .25, .5, .75, 1])
     ax.xaxis.set_major_formatter(PercentFormatter(1, decimals=0))
@@ -317,7 +336,7 @@ def glucose_bounds():
         width = count / n
         ax.barh(3.65, width, left=left, height=.68, color=fill, edgecolor=edge, hatch=hatch, lw=.9)
         ax.text(left + width / 2, 3.65, f"{count}\n{label}", ha="center", va="center",
-                fontsize=11.7, weight="bold", color=ink, linespacing=.94,
+                fontsize=12.4, weight="bold", color=ink, linespacing=.94,
                 bbox={"fc": fill, "ec": "none", "pad": .55} if hatch else None)
         left += width
     ax.annotate(f"{lower:.1%}–{upper:.1%} possible in all {n}",
@@ -325,17 +344,18 @@ def glucose_bounds():
                 ha="left", va="center", fontsize=12.6, weight="bold", color=GLUCOSE_ORANGE,
                 arrowprops={"arrowstyle": "-", "color": GLUCOSE_ORANGE, "lw": 1})
     labels = [f"All CKD records\n(n = {n})"]
-    for pos, series, (key, name, color, marker) in zip([2, 1, 0], views, DATA_VIEWS, strict=True):
-        high_in_view = int(series.ge(200).sum())
-        share = high_in_view / len(series)
-        labels.append(f"{name}\n{high_in_view}/{len(series)} high")
+    for pos, (key, name, color, marker) in zip([2, 1, 0], DATA_VIEWS, strict=True):
+        row = views.loc[key]
+        high_in_view, sample_n, share = int(row.n_high), int(row.n), row.share
+        labels.append(f"{name}\n{high_in_view}/{sample_n} high")
         ax.scatter(share, pos, marker=marker, s=85, edgecolor=color, lw=1.7,
                    facecolor="white" if key == "imputed" else color, zorder=3)
         alignment, offset = {"observed": ("center", (0, 11)), "complete_case": ("left", (8, 1)),
                              "imputed": ("right", (-8, 1))}[key]
         ax.annotate(f"{share:.1%}", (share, pos), xytext=offset, textcoords="offset points",
                     va="center", ha=alignment, fontsize=13.5, color=color, weight="bold")
-    ax.set_yticks([3.65, 2, 1, 0], labels, fontsize=12.3)
+    ax.set_yticks([3.65, 2, 1, 0], labels, fontsize=13)
+    ax.tick_params(axis="x", labelsize=13)
     ax.set_xlabel("Share of records", fontsize=13, labelpad=1)
     save(fig, "glucose_bounds.pdf",
          "Random glucose at least 200 mg/dL. Among 250 CKD records, 72 were known high and "
@@ -373,13 +393,17 @@ def pca_scale():
          "records. Original-unit PC1 explains 68.8% of variance; unit-variance PC1 explains 43.3%.")
 
 
-def grade_zero():
+def grade_zero_data():
+    """Fix one source-patient ordering for both sides of the selection matrix."""
     patients = pd.read_csv(PATIENTS)
     grade = measured_grade_zero(patients)
-    # Within each result category the cells follow source row order in both panels.
-    grade = grade.sort_values(["finding", "row_id"], ascending=[False, True]).reset_index(drop=True)
-    fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.55))
-    fig.subplots_adjust(left=.03, right=.97, bottom=.222, top=.865, wspace=.16)
+    return grade.sort_values(["finding", "row_id"], ascending=[False, True]).reset_index(drop=True)
+
+
+def grade_zero():
+    grade = grade_zero_data()
+    fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.60))
+    fig.subplots_adjust(left=.03, right=.97, bottom=.29, top=.84, wspace=.16)
     for ax, complete_only in zip(axes, (False, True), strict=True):
         included = grade.complete_case if complete_only else pd.Series(True, index=grade.index)
         for selected, symbol, face, edge in [
@@ -396,8 +420,11 @@ def grade_zero():
         label = "24 fields required" if complete_only else "Three fields required"
         ax.set_title(label, loc="left", fontsize=14, pad=11)
         n_finding = (included & grade.finding).sum()
-        ax.text(.5, -.16, f"{n_finding} of {included.sum()} with a finding",
-                transform=ax.transAxes, fontsize=13, weight="bold", ha="center")
+        retained = int(included.sum())
+        finding_label = (f"{n_finding}/{int(grade.finding.sum())} with a finding retained"
+                         if complete_only else f"{n_finding} with a finding")
+        ax.text(.5, -.13, f"{retained}/{len(grade)} retained\n{finding_label}",
+                transform=ax.transAxes, fontsize=12.5, weight="bold", ha="center", va="top")
         ax.set(xlim=(-.7, 8.7), ylim=(4.65, -.65), aspect="equal")
         ax.axis("off")
     handles = [Line2D([], [], marker=m, ls="none", markersize=7, markerfacecolor=f,
@@ -420,6 +447,8 @@ if __name__ == "__main__":
                          "legend.frameon": False, "hatch.linewidth": .65, "pdf.fonttype": 42}):
         glucose_history()
         cohort()
+        grade_zero()
         hemoglobin()
+        glucose_bounds()
         renal_coefficients()
         pca_scale()

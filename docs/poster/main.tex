@@ -16,6 +16,7 @@
 \pgfplotsset{compat=1.18}
 \usepackage{anyfontsize}
 \pdfstringdefDisableCommands{\def\translate#1{#1}}
+\setlength{\abovecaptionskip}{1ex}
 
 % Substitute the CityUHK palette in the template's existing color roles.
 \definecolor{maroon}{HTML}{941344}
@@ -30,8 +31,8 @@
 \newlength{\flowcolwidth}
 \newlength{\colwidth}
 \setlength{\sepwidth}{0.0175\paperwidth}
-\setlength{\flowcolwidth}{0.25\paperwidth}
-\setlength{\colwidth}{0.34\paperwidth}
+\setlength{\flowcolwidth}{0.47375\paperwidth}
+\setlength{\colwidth}{0.31\paperwidth}
 \newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
 
 \title{RenalLens: When Missing Data Change the Picture}
@@ -61,54 +62,70 @@
 
 \begin{column}{\flowcolwidth}
   \begin{block}{Start with Record 43}
-    One CKD-labeled patient has an observed glucose result above the study's 200 mg/dL threshold.
-
-    \vspace{.4ex}
     \input{case_record43.tex}
 
-    \textbf{Only the red cell assessment (rbc) is missing.} The 24-field rule excludes this record; the five-marker rule retains it.
-  \end{block}
-
-  \begin{block}{See the measured patients}
-    \begin{figure}
-      \centering
-      \includegraphics[width=\linewidth]{figures/glucose_history.pdf}
-      \caption{Each dot is one measured CKD record; the diamond marks Record 43. Orange points meet the study threshold. Glucose is missing in 26 no-history and 12 history records.}
-    \end{figure}
-  \end{block}
-
-  \begin{alertblock}{Compare three processing choices}
-    \textbf{Available:} use the measured fields each question needs.\par
-    \textbf{Complete:} require all 24 explanatory fields. Also compare the five-marker requirement.\par
-    \textbf{Filled:} use pooled medians for numbers and modes for categories. Diagnosis is excluded from filling.
-  \end{alertblock}
-
-  \begin{block}{The question}
-    Which patients, distributions and relationships remain visible after these choices?
+    \textbf{One CKD-labeled record; only the red cell assessment (rbc) is missing.}
+    The 24-field rule excludes it; the five-marker rule retains its measured 204 mg/dL glucose.
   \end{block}
 \end{column}
 
 \separatorcolumn
 
+\begin{column}{\flowcolwidth}
+  \begin{alertblock}{Compare three processing choices}
+    \textbf{Available:} use the measured fields each question needs.\par
+    \textbf{Complete:} require all 24 explanatory fields; compare a five-marker rule.\par
+    \textbf{Filled:} use pooled numeric medians and categorical modes, without diagnosis labels.
+  \end{alertblock}
+\end{column}
+
+\separatorcolumn
+\end{columns}
+\vspace{.4ex}
+\begin{columns}[t]
+\separatorcolumn
+
 \begin{column}{\colwidth}
-  \begin{block}{1. Selection changes the cohort}
-    The same 400 records yield different cohorts when completeness requires different fields.
+  \begin{block}{1. Deletion changes who remains}
     \begin{figure}
       \centering
       \includegraphics[width=\linewidth]{figures/cohort_selection.pdf}
-      \caption{Five markers: hemoglobin, creatinine, urea, glucose and blood pressure. Counts share one zero-based axis; right-hand percentages give CKD shares.}
+      \caption{Five markers: hemoglobin, creatinine, urea, glucose and blood pressure. Counts share one zero-based axis; percentages give CKD shares.}
     \end{figure}
-    \textbf{CKD retention: 43/250 with 24 fields, versus 165/250 with five.} Non-CKD retention is 115/150 versus 135/150.
+    \textbf{CKD retention: 43/250 with 24 fields, versus 165/250 with five.}
+    Non-CKD retention is 115/150 versus 135/150.
 
-    Under the 24-field rule, median creatinine falls from \textbf{1.30 to 1.10 mg/dL} overall ($n=383\to158$), but rises from \textbf{2.25 to 4.10} within CKD ($n=238\to43$). Both diagnosis mix and within-group selection change.
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{figures/grade_zero_selection.pdf}
+      \caption{The same 45 grade-0 CKD patients have observed albumin, anemia status and glucose. Positions preserve patient identity; the ring marks Record 43. A finding means anemia or glucose $\geq$200 mg/dL.}
+    \end{figure}
+    \textbf{Only 1/45 remains; all 16 with a finding are excluded.}
+
+    Under the 24-field rule, median creatinine changes in opposite directions: \textbf{1.30 to 1.10 mg/dL}
+    overall ($n=383\to158$), but \textbf{2.25 to 4.10} within CKD
+    ($n=238\to43$). Selection changes both diagnosis mix and patients within each group.
   \end{block}
+\end{column}
 
-  \begin{block}{2. Filling changes the distribution}
-    A single fill value creates a visible concentration: \textbf{52/400 records (13\%)} receive hemoglobin 12.65.
+\separatorcolumn
+
+\begin{column}{\colwidth}
+  \begin{block}{2. Filling creates a spike at 12.65}
+    \textbf{52/400 records (13\%)} receive the same hemoglobin value.
     \begin{figure}
       \centering
       \includegraphics[width=\linewidth]{figures/hemoglobin_views.pdf}
-      \caption{Curves show the share at or below each value, on the same axis. None of the 348 measured values equals 12.65. Hemoglobin keeps UCI's source units.}
+      \caption{Curves show the share at or below each value. None of the 348 measured values equals 12.65. Hemoglobin keeps UCI's source units.}
+    \end{figure}
+  \end{block}
+
+  \begin{block}{3. Complete cases exceed the glucose bound}
+    \textbf{46.5\% in the selected 43, versus at most 44.0\% in all 250.}
+    \begin{figure}
+      \centering
+      \includegraphics[width=\linewidth]{figures/glucose_bounds.pdf}
+      \caption{High means glucose $\geq$200 mg/dL. The band assigns all 38 missing readings as low or high: 72/250 to 110/250. These are logical bounds, not confidence intervals. Each point prints its own denominator.}
     \end{figure}
   \end{block}
 \end{column}
@@ -116,7 +133,7 @@
 \separatorcolumn
 
 \begin{column}{\colwidth}
-  \begin{block}{3. Deletion changes the association}
+  \begin{block}{4. Deletion changes the association}
     Creatinine and blood urea give different answers about linear and rank association after deletion.
     \begin{figure}
       \centering
@@ -126,18 +143,15 @@
     \textbf{Pearson rises from 0.586 to 0.896; Spearman falls from 0.703 to 0.478.} The highest creatinine (76 mg/dL) mainly affects the linear result; it remains in the main analysis.
   \end{block}
 
-  \begin{block}{4. Units change the summary}
+  \begin{block}{5. Units change the summary}
     Hold the same 400 filled records and five markers fixed; change only their measurement scales.
     \begin{figure}
       \centering
       \includegraphics[width=\linewidth]{figures/pca_scale.pdf}
       \caption{Signed PC1 coefficients use the same coefficient scale. Standardization moves the axis from glucose dominance to urea, hemoglobin and creatinine, with hemoglobin pointing oppositely.}
     \end{figure}
-    \textbf{Read the preprocessing with the picture:} choose fields for the question, show each denominator and keep measured values distinct from filled values.
+    \textbf{Show each denominator; distinguish measured values from filled values.}
   \end{block}
-
-  {\small\raggedright Follow Record 43 through both interactive views:\par
-  \href{https://github.com/CanyonChen/RenalLens/tree/zjj/visualization-integration}{\texttt{zjj/visualization-integration}} \enspace\textbar\enspace open \texttt{docs/index.html}.\par}
 \end{column}
 
 \separatorcolumn

@@ -1,8 +1,8 @@
 # Visualization integration validation
 
-Validated on November 16, 2026 against base commit `b8b7eab3a17cb5863eb0459f3b248c3bfe6a17e2`.
+Initial integration validated on November 16, 2026 against base commit `b8b7eab3a17cb5863eb0459f3b248c3bfe6a17e2`. The latest poster evidence integration is recorded in the November 17 section below.
 
-## Results
+## Initial integration results
 
 - All 50 existing CSV tables under `docs/results`, `docs/reanalysis/tables` and `docs/reanalysis/clinical_tables` match the base numerically (`rtol=1e-11`, `atol=1e-12`). The original 24-field analysis is preserved.
 - The new eligibility table retains 158 records (43 CKD, 115 non-CKD) under all24, and 300 (165 CKD, 135 non-CKD) under core5.
@@ -52,3 +52,37 @@ and rendered pixels match the pre-refinement versions, so their original PDF
 binaries are retained. The offline package is refreshed with the final poster
 and preview. Local build logs, PDF checks, numerical comparisons and crop images
 are under `outputs/poster-refinement/`.
+
+## Poster evidence integration, November 17, 2026
+
+Baseline: `3824b374c9e2a491162a59dab5531e43db04c250`. The approved revision
+combines the reviewed poster's patient-selection and missing-value-bound
+evidence with the branch's readable case entry and signed PCA coefficients.
+
+- The full `scripts/build.py --pdf --check --package` run passes eight Python
+  tests, three JavaScript tests, 27 real-browser checks with zero page errors,
+  and 110 local links/assets across seven pages.
+- Two new source-data tests were first observed failing for the missing data
+  preparation helpers, then pass after implementation. They check all 45
+  grade-0 patient identities, 16 with a finding, 1 retained and 0/16 findings
+  retained, plus the logical glucose bounds and all three view denominators.
+- All 51 pre-existing CSV tables match the baseline numerically with the
+  stated tolerances. No files under `RenalLensPoster/` changed.
+- The final vector poster remains one 132 x 80 cm page. All five finding
+  headings, the compact case table, patient-retention labels and glucose
+  denominators extract correctly. The smallest extracted text is 20.66 pt.
+  There are no overfull boxes, out-of-page text/links or replacement characters.
+  The original logo is the only embedded raster image; charts remain vector.
+- The final full-page render and entry, patient, glucose-bound and PCA crops
+  were inspected. `docs/poster/preview.png` renders the final print PDF. Bounds
+  are explicitly distinguished from confidence intervals, and the creatinine
+  median reversal explicitly names the 24-field rule.
+- Independent source review found the missing 24-field condition in that
+  paragraph; it was restored. No other important issues remained in the review.
+- The one-page A4 report and eight-page presentation retain identical text and
+  rendered pixels, so their original PDF binaries are retained. The offline
+  package is refreshed with the final poster, preview and documentation.
+
+Build logs, numerical/PDF/package verification and cropped renders are under
+`outputs/poster-integration-2026-11-17/`. The user-supplied reference PDF was read
+for review; editable repository sources produce the updated deliverable.

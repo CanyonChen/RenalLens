@@ -29,6 +29,34 @@ class PosterSourceTests(unittest.TestCase):
         self.assertEqual(summary.set_index("dm").loc["no", ["n_measured", "n_high", "n_missing"]].tolist(), [87, 11, 26])
         self.assertEqual(summary.set_index("dm").loc["yes", ["n_measured", "n_high", "n_missing"]].tolist(), [125, 61, 12])
 
+    def test_glucose_bounds_keep_the_original_cohort_and_each_view_denominator(self):
+        totals, views = poster.glucose_bounds_data()
+        self.assertEqual([totals[key] for key in ("n_total", "n_high", "n_missing", "n_below")],
+                         [250, 72, 38, 140])
+        self.assertAlmostEqual(totals["lower"], 72 / 250)
+        self.assertAlmostEqual(totals["upper"], 110 / 250)
+        views = views.set_index("view")
+        for key, expected in (("observed", [212, 72]), ("complete_case", [43, 20]),
+                              ("imputed", [250, 72])):
+            self.assertEqual(views.loc[key, ["n", "n_high"]].tolist(), expected)
+            self.assertAlmostEqual(views.loc[key, "share"], expected[1] / expected[0])
+        self.assertGreater(views.loc["complete_case", "share"], totals["upper"])
+
+    def test_grade_zero_matrix_keeps_patient_identity_and_shows_all_16_exclusions(self):
+        grade = poster.grade_zero_data()
+        source = pd.read_csv(ROOT / "docs/reanalysis/clinical_tables/patient_measurements.csv")
+        expected_ids = source.loc[source.al.eq(0) & source.anemia.notna() & source.bgr.notna(), "row_id"]
+        self.assertEqual(set(grade.row_id), set(expected_ids))
+        self.assertTrue(grade.row_id.is_unique)
+        self.assertEqual(len(grade), 45)
+        self.assertEqual(int(grade.finding.sum()), 16)
+        self.assertEqual(int(grade.complete_case.sum()), 1)
+        self.assertEqual(int((grade.complete_case & grade.finding).sum()), 0)
+        case = grade.set_index("row_id").loc[43]
+        self.assertEqual(case.bgr, 204)
+        self.assertTrue(case.finding)
+        self.assertFalse(case.complete_case)
+
 
 if __name__ == "__main__":
     unittest.main()
