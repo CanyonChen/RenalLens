@@ -12,6 +12,7 @@
 \usepackage[T1]{fontenc}
 \IfFileExists{lmodern.sty}{\usepackage{lmodern}}{} % Vector Computer Modern family.
 \usepackage[a4paper,top=1cm,bottom=1cm,left=1cm,right=1cm,marginparwidth=1.75cm]{geometry}
+\setlength{\footskip}{14pt}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
@@ -26,7 +27,6 @@
 
 \title{
   \usefont{OT1}{bch}{b}{n}
-  % \normalfont \normalsize \textsc{DSC5002 Project Report \enspace / \enspace C61 Group 65} \\ [10pt]
   \huge RenalLens: How Missing Data Shape the Clinical Picture of Chronic Kidney Disease
 }
 \usepackage{authblk}
@@ -37,13 +37,14 @@
 \author[1]{\protect\linebreak PENG Peiyan}
 \author[1]{ZHAI Junsong}
 \author[1]{ZHANG Junjie}
-\affil[1]{\small DSC5002-C61, Group 65}
+\affil[1]{\small City University of Hong Kong \enspace$\cdot$\enspace DSC5002-C61, Group 65}
 \date{}
 
-% Keep the study question with the full-width title in the supplied template.
+% The course report is a sheet of figures and statistical summaries.
 \makeatletter
 \g@addto@macro\@maketitle{%
-  \noindent\textbf{Abstract.} We compared three views of 400 \href{https://doi.org/10.24432/C5G020}{UCI records} (Rubini et al., 2015), including 250 CKD and 150 non-CKD. We used available measurements, records with all 24 features, or all records after imputation. Missing numeric values received the overall median and categories the mode, without using diagnosis.\par\vspace{7pt}}
+  \vspace{-1.7em}%
+  \noindent\textbf{Data compared.} Of 400 \href{https://doi.org/10.24432/C5G020}{UCI patient records}, 250 were labelled chronic kidney disease (CKD) and 150 non-CKD. \textit{Available} uses the measurements needed for each comparison. \textit{Complete} requires all 24 fields. \textit{Imputed} keeps all 400 and fills missing numbers with the pooled median and categories with the mode, without using diagnosis.\par\vspace{5pt}}
 \makeatother
 
 \begin{document}
@@ -53,43 +54,52 @@
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\columnwidth]{figures/sample_composition.pdf}
-  \caption{\textbf{Deleting incomplete records changes who is represented.} Bar widths show group shares. The CKD share fell from 62.5\% to 27.2\%. Red cell assessment (152/400 missing), red cell count (131/400) and white cell count (106/400) had the most gaps.}
+  \includegraphics[width=.95\columnwidth]{figures/sample_composition.pdf}
+  \caption{\textbf{Who remains after deletion?} Each bar shows the diagnostic mix before or after requiring all 24 fields. Only 43/250 CKD records (17.2\%) remained, compared with 115/150 non-CKD records (76.7\%). CKD's share fell from 62.5\% to 27.2\%. The most frequently missing field was the red blood cell assessment (152/400).}
 \end{figure}
-
-\noindent Median creatinine fell from 1.30 to 1.10~mg/dL overall, yet rose from 2.25 to 4.10 within CKD. The pooled decrease masks higher creatinine among the CKD patients who remained.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/hemoglobin_ecdf.pdf}
-  \caption{\textbf{Filling gaps creates a new pile-up.} No measured hemoglobin equaled 12.65. All 52 filled values landed there, creating a 13-point jump in the cumulative distribution. The interquartile range shrank from 4.70 to 3.75 source units.}
-\end{figure}
-
-\newpage % Start the clinical interpretation in the second column.
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/glucose_threshold.pdf}
-  \caption{\textbf{High glucose in CKD.} Filling 38 missing readings with 121~mg/dL placed all below 200. Counting none or all 38 as high gives 28.8--44.0\% among 250 patients. Complete cases alone exceed this upper bound (46.5\%).}
-\end{figure}
-
-\noindent\textbf{Record 43} had anemia and glucose of 204~mg/dL. Its missing red cell assessment excluded this high reading from complete cases. Follow-up outcomes were unavailable.
 
 \begin{table}[H]
   \centering
-  {\small\setlength{\tabcolsep}{2pt}
-  \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrr@{}}
-  \hline
-  Data used & Pairs & Pearson $r$ & Spearman $\rho$\\
-  \hline
-  Available & 380 & 0.586 & 0.703\\
-  Complete & 158 & 0.896 & 0.478\\
-  Imputed & 400 & 0.582 & 0.696\\
-  \hline
-  \end{tabular*}}
-  \caption{\textbf{Creatinine and blood urea.} Deletion strengthened linear correlation and weakened rank correlation.}
+  \small
+  \begin{tabular*}{.95\columnwidth}{@{\extracolsep{\fill}}lrr@{}}
+    \hline
+    Group & Available ($n$) & Complete ($n$)\\
+    \hline
+    All records & 1.30 (383) & 1.10 (158)\\
+    CKD & 2.25 (238) & 4.10 (43)\\
+    Non-CKD & 0.90 (145) & 0.90 (115)\\
+    \hline
+  \end{tabular*}
+  \caption{\textbf{Median creatinine (mg/dL).} Splitting the cohort by diagnosis reveals a reversal. After deletion the overall median fell, while the median among the remaining CKD patients rose.}
 \end{table}
-\noindent Creatinine skewness fell from 7.51 to 1.03 on a natural-log scale ($n=383$). Omitting the 76~mg/dL maximum raises available-pair $r$ to 0.674.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.95\columnwidth]{figures/hemoglobin_ecdf.pdf}
+  \caption{\textbf{Filling gaps puts 52 records at one value.} The curves show the fraction at or below each hemoglobin value. None of 348 measured values equalled 12.65. Filling the 52 gaps placed 13\% of all records at 12.65. The middle half of the distribution spanned 4.70 source units in the available data, 3.18 in complete records and 3.75 after filling.}
+\end{figure}
 
 \smallskip
-% \noindent{\footnotesize \href{https://github.com/CanyonChen/RenalLens/tree/main/docs/reanalysis/tables}{Analysis tables} and \href{https://github.com/CanyonChen/RenalLens/blob/main/docs/reanalysis/missing_data.html}{methods supplement}. Figures used \href{https://doi.org/10.48550/arXiv.2609.00065}{Scientific Agent Skills} (Kassis et al., 2026).}
+\noindent{\footnotesize \raggedright
+\href{https://doi.org/10.24432/C5G020}{UCI dataset (Rubini et al., 2015)} \enspace$\cdot$\enspace
+\href{https://github.com/CanyonChen/RenalLens/tree/main/docs/reanalysis/tables}{Analysis tables}\\
+Figure preparation: \href{https://doi.org/10.48550/arXiv.2609.00065}{Scientific Agent Skills (Kassis et al., 2026)}.\par}
+
+\newpage % Continue at the top of the second template column.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.98\columnwidth]{figures/glucose_threshold.pdf}
+  \caption{\textbf{Fewer high readings, a higher percentage.} Deletion reduced the count with random glucose $\geq$200~mg/dL from 72 to 20. The denominator shrank from 212 to 43, raising the share to 46.5\%. Even if all 38 missing readings were high, the share among all 250 CKD records could reach only 44.0\%. Filling them with 121~mg/dL gives the lower bound of 28.8\%.}
+\end{figure}
+
+\noindent\textbf{Which findings were lost?} Of 45 CKD records with urine albumin grade~0, known anemia status and measured glucose, 16 had anemia or high glucose. Only one of the 45 was complete, and that patient had neither finding. Among those excluded, Record~43 had anemia and glucose of 204~mg/dL. Only its red blood cell assessment was missing.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.98\columnwidth]{figures/renal_coefficients.pdf}
+  \caption{\textbf{Creatinine and blood urea.} Deletion strengthened the linear correlation (Pearson) and weakened the rank correlation (Spearman). Whiskers show 95\% bootstrap intervals from 5,000 resamples within diagnosis groups. Diamonds show estimates after filling gaps.}
+\end{figure}
+
+\noindent\textbf{Checks on extremes and scale.} Omitting the highest creatinine (76~mg/dL) moved Pearson from 0.586 to 0.674 and Spearman from 0.703 to 0.701 among measured pairs. Taking logs reduced creatinine skewness from 7.51 to 1.03 ($n=383$). For hemoglobin, creatinine, urea, glucose and blood pressure in the same 400 imputed records, the first principal component explained 68.8\% of variance in original units and 43.3\% after standardization.
+
 \end{document}

@@ -65,28 +65,72 @@ def hemoglobin(values):
 
 def glucose(values):
     ckd = values[values.feature.eq("bgr") & values.group.eq("ckd")]
-    groups = [(ckd.observed.dropna(), "o", INK), (ckd.loc[ckd.complete_case, "observed"], "s", BURGUNDY),
-              (ckd.imputed, "D", TEAL)]
-    fig, ax = plt.subplots(figsize=(2.95, 1.48))
-    fig.subplots_adjust(left=.27, right=.98, top=.96, bottom=.31)
-    for y, (readings, marker, color) in zip([3, 2, 1], groups, strict=True):
-        high = readings.ge(200).sum()
-        pct = 100 * high / len(readings)
-        ax.plot(pct, y, marker=marker, ms=5, color=color)
-        ax.annotate(f"{high}/{len(readings)}", (pct, y), xytext=(5, 0),
-                    textcoords="offset points", va="center", fontsize=7)
-    high = ckd.observed.ge(200).sum()
-    missing = ckd.observed.isna().sum()
-    bounds = 100 * np.array([high, high + missing]) / len(ckd)
-    ax.hlines(0, *bounds, color=INK, linewidth=1.6)
-    ax.plot(bounds, [0, 0], "|", color=INK, markersize=7)
-    ax.set(xlim=(0, 61), xticks=[0, 20, 40, 60], ylim=(-.5, 3.5),
-           yticks=[3, 2, 1, 0], yticklabels=["Available", "Complete", "Imputed", "All possible"],
+    measured = ckd.observed.dropna()
+    known_high = measured.ge(200).sum()
+    unknown = len(ckd) - len(measured)
+    low, high = 100 * np.array([known_high, known_high + unknown]) / len(ckd)
+    groups = [
+        ("Available", measured, "o", INK),
+        ("Complete", ckd.loc[ckd.complete_case, "observed"], "s", BURGUNDY),
+        ("Imputed", ckd.imputed, "D", TEAL),
+    ]
+
+    fig, ax = plt.subplots(figsize=(3.45, 1.48))
+    fig.subplots_adjust(left=.375, right=.957, top=.79, bottom=.29)
+    fig.text(.02, .92, f"Shaded range in all {len(ckd)} CKD records: {low:.1f}%–{high:.1f}%",
+             va="center", fontsize=7.4, color="#804209")
+    ax.axvspan(low, high, color="#FBEDDC", zorder=0)
+    ax.vlines([low, high], -.45, 2.45, colors="#9A5516", linestyles=":", lw=.8)
+    labels = []
+    for y, (name, readings, marker, color) in zip([2, 1, 0], groups, strict=True):
+        count = readings.ge(200).sum()
+        share = 100 * count / len(readings)
+        labels.append(f"{name} ({count}/{len(readings)})")
+        ax.plot(share, y, marker=marker, ms=4.8, color=color,
+                markerfacecolor="white" if name == "Imputed" else color, zorder=3)
+        ax.text(.995, y, f"{share:.1f}%", transform=ax.get_yaxis_transform(),
+                ha="right", va="center", fontsize=7.4, fontweight="bold", color=color)
+
+    ax.set(xlim=(0, 60), xticks=[0, 20, 40, 60], ylim=(-.45, 2.45),
+           yticks=[2, 1, 0], yticklabels=labels,
            xlabel="Share with random glucose ≥200 mg/dL")
     ax.xaxis.set_major_formatter(PercentFormatter(100, decimals=0))
-    ax.tick_params(axis="y", length=0)
+    ax.tick_params(axis="y", length=0, labelsize=7.4)
+    ax.tick_params(axis="x", length=2, pad=2)
+    ax.xaxis.labelpad = 2
     ax.spines["left"].set_visible(False)
-    ax.grid(axis="x", color=GRID, lw=.5)
+    return fig
+
+
+def renal_coefficients():
+    rows = pd.read_csv(TABLES / "renal_correlations.csv").query("group == 'all'").set_index("view")
+    methods = [
+        ("observed", "Available", "o", INK),
+        ("complete_case", "Complete", "s", BURGUNDY),
+        ("imputed", "Imputed", "D", TEAL),
+    ]
+    fig, axes = plt.subplots(1, 2, figsize=(3.55, 1.50), sharey=True)
+    fig.subplots_adjust(left=.245, right=.978, bottom=.15, top=.84, wspace=.25)
+    for axis, metric, title in zip(axes, ["pearson", "spearman"], ["Pearson r", "Spearman ρ"], strict=True):
+        axis.set_title(title, fontsize=8.2, fontweight="bold", pad=3)
+        axis.set(xlim=(0, 1), xticks=[0, .5, 1], xticklabels=["0", "0.5", "1"], ylim=(-.38, 2.65))
+        axis.grid(axis="x", linewidth=.45, color=GRID)
+        axis.spines["left"].set_visible(False)
+        axis.tick_params(axis="x", length=2, pad=2)
+        axis.tick_params(axis="y", length=0, pad=4)
+        for y, (key, _, marker, color) in zip([2, 1, 0], methods, strict=True):
+            row = rows.loc[key]
+            value = row[metric]
+            lower, upper = row[[f"{metric}_ci_low", f"{metric}_ci_high"]]
+            if pd.notna(lower) and pd.notna(upper):
+                axis.hlines(y, lower, upper, color=color, linewidth=.9)
+                axis.vlines([lower, upper], y-.09, y+.09, color=color, linewidth=.8)
+            axis.plot(value, y, marker=marker, markersize=4, color=color, zorder=3,
+                      markerfacecolor="white" if key == "imputed" else color)
+            axis.annotate(f"{value:.3f}", (value, y), xytext=(0, 3), textcoords="offset points",
+                          ha="center", va="bottom", fontsize=7.3, color=color)
+    labels = [f"{name}\nn = {int(rows.at[key, 'n_pairs'])}" for key, name, _, _ in methods]
+    axes[0].set_yticks([2, 1, 0], labels, fontsize=7.3)
     return fig
 
 
@@ -99,6 +143,7 @@ def main():
         ("sample_composition", composition, (), "Diagnosis counts among all and complete records", "retention.csv"),
         ("hemoglobin_ecdf", hemoglobin, (values,), "Hemoglobin distributions by missing-data rule", "measurement_values.csv"),
         ("glucose_threshold", glucose, (values,), "High glucose by rule and bounds for all CKD records", "measurement_values.csv"),
+        ("renal_coefficients", renal_coefficients, (), "Creatinine and blood urea: estimated correlations and 95% bootstrap intervals", "renal_correlations.csv"),
     ]
     with mpl.rc_context(style):
         for name, draw, args, title, source in charts:
